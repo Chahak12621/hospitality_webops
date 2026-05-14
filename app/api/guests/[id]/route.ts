@@ -21,13 +21,15 @@ function getSupabaseUserClient(req: NextRequest) {
 // =========================
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
+
     const { data, error } = await supabaseAdmin
       .from('guests')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error) throw error;
@@ -47,9 +49,11 @@ export async function GET(
 // =========================
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
+
     const supabase = getSupabaseUserClient(req);
 
     const {
@@ -71,7 +75,7 @@ export async function PATCH(
     let query = supabaseAdmin
       .from('guests')
       .update(body)
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (profile?.role === 'event_head') {
       query = query.eq('created_by', user.id);
@@ -96,9 +100,11 @@ export async function PATCH(
 // =========================
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
+
     const supabase = getSupabaseUserClient(req);
 
     const {
@@ -118,7 +124,7 @@ export async function DELETE(
     let query = supabaseAdmin
       .from('guests')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (profile?.role === 'event_head') {
       query = query.eq('created_by', user.id);
