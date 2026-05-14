@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import type { UserRole } from "@/types/database.types";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function LoginPage() {
     email: "",
     phone: "",
     password: "",
-    role: "coordinator",
+    role: "coordinator" as UserRole
   });
 
   const handleChange = (
@@ -32,11 +33,23 @@ export default function LoginPage() {
       [e.target.name]: e.target.value,
     });
   };
+const redirectByRole = (role: UserRole) => {
+  switch (role) {
+    case "superadmin":
+    case "coordinator":
+    case "volunteer":
+      router.push("/dashboard");
+      break;
 
-  // =========================
-  // SIGN IN
-  // =========================
+    case "event_head":
+      router.push("/dashboard/my-guests");
+      break;
 
+    default:
+      router.push("/");
+  }
+};
+  
   const handleSignIn = async () => {
     try {
       setLoading(true);
@@ -53,40 +66,71 @@ export default function LoginPage() {
 
       const user = data.user;
 
-      const { data: profile } = await supabase
+      if (!user) {
+        alert("User not found");
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .single();
 
+      if (profileError || !profile) {
+        alert("Profile not found");
+        return;
+      }
+
       // ROLE BASED REDIRECT
 
-      if (profile.role === "superadmin") {
-        router.push("/dashboard");
-      }
+      switch (profile.role) {
+        case "superadmin":
+          router.push("/dashboard");
+          break;
 
-      else if (profile.role === "coordinator") {
-        router.push("/dashboard");
-      }
+        case "coordinator":
+          router.push("/dashboard");
+          break;
 
-      else if (profile.role === "event_head") {
-        router.push("/dashboard/my-guests");
-      }
+        case "volunteer":
+          router.push("/dashboard");
+          break;
 
+        case "event_head":
+          router.push("/dashboard/my-guests");
+          break;
+
+        default:
+          router.push("/");
+      }
     } catch (err) {
       console.log(err);
+      alert("Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
-  // =========================
-  // SIGN UP
-  // =========================
+  
 
   const handleSignUp = async () => {
     try {
       setLoading(true);
+
+      // SECURITY CHECK
+      // NEVER ALLOW SUPERADMIN FROM FRONTEND
+
+      const allowedRoles = [
+        "coordinator",
+        "volunteer",
+        "event_head",
+      ];
+
+      if (!allowedRoles.includes(formData.role)) {
+        alert("Invalid role selected");
+        return;
+      }
 
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
@@ -100,9 +144,12 @@ export default function LoginPage() {
 
       const user = data.user;
 
-      if (!user) return;
+      if (!user) {
+        alert("User creation failed");
+        return;
+      }
 
-      // INSERT INTO PROFILES
+      // INSERT PROFILE
 
       const { error: profileError } = await supabase
         .from("profiles")
@@ -112,6 +159,8 @@ export default function LoginPage() {
             full_name: formData.full_name,
             email: formData.email,
             phone: formData.phone,
+
+            // ONLY SAFE ROLES
             role: formData.role,
           },
         ]);
@@ -124,10 +173,16 @@ export default function LoginPage() {
 
       alert("Account created successfully!");
 
-      router.push("/dashboard");
+      // ROLE BASED REDIRECT AFTER SIGNUP
 
+      if (formData.role === "event_head") {
+        router.push("/dashboard/my-guests");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       console.log(err);
+      alert("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -150,7 +205,7 @@ export default function LoginPage() {
       >
 
         {/* LEFT */}
-        <div className="hidden md:flex flex-col justify-between p-12 relative overflow-hidden bg-gradient-to-br from-pink-500/10 to-fuchsia-500/5">
+        <div className="hidden md:flex flex-col justify-between p-8 lg:p-12 relative overflow-hidden bg-gradient-to-br from-pink-500/10 to-fuchsia-500/5">
 
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,0,128,0.2),transparent_45%)]" />
 
@@ -171,7 +226,7 @@ export default function LoginPage() {
               </h1>
             </div>
 
-            <h2 className="text-5xl font-black leading-tight mt-16">
+            <h2 className="text-3xl lg:text-5xl font-black leading-tight mt-12 lg:mt-16">
               अतिथि
               <br />
 
@@ -180,7 +235,7 @@ export default function LoginPage() {
               </span>
             </h2>
 
-            <p className="text-gray-300 leading-relaxed mt-8 text-lg">
+            <p className="text-gray-300 leading-relaxed mt-6 lg:mt-8 text-base lg:text-lg">
               Every guest deserves warmth, comfort and respect.
               Let us work together to create unforgettable experiences.
             </p>
@@ -195,7 +250,7 @@ export default function LoginPage() {
         </div>
 
         {/* RIGHT */}
-        <div className="p-8 md:p-14 flex flex-col justify-center">
+        <div className="p-6 sm:p-8 md:p-14 flex flex-col justify-center">
 
           <div className="mb-10">
 
@@ -203,7 +258,7 @@ export default function LoginPage() {
               Hospitality Portal
             </p>
 
-            <h2 className="text-4xl font-black">
+            <h2 className="text-3xl sm:text-4xl font-black">
 
               {isSignup ? "Create Account" : "Welcome Back"}
             </h2>
@@ -260,7 +315,11 @@ export default function LoginPage() {
                   className="w-full bg-black/40 border border-pink-500/20 focus:border-pink-500 rounded-2xl px-5 py-4 outline-none"
                 >
                   <option value="coordinator">
-                    Coordinator / Volunteer
+                    Coordinator
+                  </option>
+
+                  <option value="volunteer">
+                    Volunteer
                   </option>
 
                   <option value="event_head">
