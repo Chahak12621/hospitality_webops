@@ -14,7 +14,7 @@ import { supabase } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/getUser';
 import { hasPermission } from '@/lib/permissions';
 
-import type { Guest, Profile } from '@/types/database.types';
+import type { Event, Guest, Profile } from '@/types/database.types';
 
 // ─── helper: always get a fresh Bearer token ───────────────────────────────
 async function authHeaders(): Promise<HeadersInit> {
@@ -36,6 +36,8 @@ export default function GuestsPage() {
   const [loading, setLoading] = useState(true);
 
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [members, setMembers] = useState<Profile[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -51,13 +53,17 @@ export default function GuestsPage() {
     const q = searchQuery.toLowerCase();
 
     setFiltered(
-      guests.filter(
-        (g) =>
+      guests.filter((g) => {
+        const eventHead = getEventHeadName(g)?.toLowerCase() ?? '';
+
+        return (
           g.name?.toLowerCase().includes(q) ||
           g.email?.toLowerCase().includes(q) ||
           g.phone?.toLowerCase().includes(q) ||
-          g.event_name?.toLowerCase().includes(q)
-      )
+          g.event_name?.toLowerCase().includes(q) ||
+          eventHead.includes(q)
+        );
+      })
     );
   }, [searchQuery, guests]);
 
@@ -70,14 +76,24 @@ export default function GuestsPage() {
         return;
       }
 
+      if (user.role === 'event_head') {
+        window.location.href = '/dashboard/my-guests';
+        return;
+      }
+
+      if (user.role === 'volunteer') {
+        window.location.href = '/dashboard';
+        return;
+      }
+
       setCurrentUser(user);
-      await fetchGuests(user);
+      await Promise.all([fetchGuests(), fetchEvents(), fetchTeamMembers()]);
     } catch (error) {
       console.error('Error initializing guests page:', error);
     }
   };
 
-  const fetchGuests = async (user?: Profile) => {
+  const fetchGuests = async () => {
     try {
       setLoading(true);
 
@@ -97,6 +113,51 @@ export default function GuestsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchEvents = async () => {
+    try {
+      const headers = await authHeaders();
+      const response = await fetch('/api/events', { headers });
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error(data.error);
+        return;
+      }
+
+      setEvents(data);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+
+  const fetchTeamMembers = async () => {
+    try {
+      const headers = await authHeaders();
+      const response = await fetch('/api/team', { headers });
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error(data.error);
+        return;
+      }
+
+      setMembers(data);
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+    }
+  };
+
+  const getEventHeadName = (guest: Guest) => {
+    if (!guest.event_id) {
+      return '';
+    }
+
+    const event = events.find((item) => item.id === guest.event_id);
+    const eventHeadId = event?.assigned_event_head;
+
+    return members.find((member) => member.id === eventHeadId)?.full_name || '';
   };
 
   const handleDelete = async (id: string) => {
@@ -223,6 +284,12 @@ export default function GuestsPage() {
                 <p className="text-pink-400 text-sm mb-2">
                   {guest.event_name}
                 </p>
+
+                {getEventHeadName(guest) ? (
+                  <p className="text-sm text-gray-400 mb-2">
+                    Event Head: {getEventHeadName(guest)}
+                  </p>
+                ) : null}
 
                 <div className="space-y-1 text-sm text-gray-400">
                   <p>{guest.email}</p>

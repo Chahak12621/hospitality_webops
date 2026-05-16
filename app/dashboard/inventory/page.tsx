@@ -1,326 +1,453 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import {
   Package,
   Plus,
-  Edit2,
+  Pencil,
   Trash2,
-  Loader,
-} from 'lucide-react';
+  Search,
+  Boxes,
+} from "lucide-react";
 
-import { getUserRole } from '@/lib/getUser';
-
-import type { UserRole } from '@/types/database.types';
-
-type InventoryRecord = {
+type InventoryItem = {
   id: string;
   item_name: string;
-  category?: string;
   quantity: number;
-  unit?: string;
-  location?: string;
-  status:
-    | 'available'
-    | 'in_use'
-    | 'maintenance'
-    | 'out_of_stock';
+  status: string;
+  notes: string;
+  category: string;
+  unit: string;
+  location: string;
 };
 
-export default function InventoryPage() {
-  const [inventory, setInventory] = useState<InventoryRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
+export default function InventoryDashboard() {
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    category: '',
+  const [search, setSearch] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const [form, setForm] = useState({
+    item_name: "",
     quantity: 0,
-    unit: '',
-    location: '',
-    status: 'available' as
-      | 'available'
-      | 'in_use'
-      | 'maintenance'
-      | 'out_of_stock',
+    status: "available",
+    notes: "",
+    category: "",
+    unit: "",
+    location: "",
   });
 
+  // ─────────────────────────────────────────────
+  // FETCH INVENTORY
+  // ─────────────────────────────────────────────
   useEffect(() => {
-    fetchData();
+    fetchInventory();
   }, []);
 
-  const fetchData = async () => {
+  const fetchInventory = async () => {
+    const { data, error } = await supabase
+      .from("inventory_items")
+      .select("*")
+      .order("updated_at", { ascending: false });
+
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    setInventory(data || []);
+  };
+
+  // ─────────────────────────────────────────────
+  // CREATE / UPDATE
+  // ─────────────────────────────────────────────
+  const handleSubmit = async () => {
     try {
       setLoading(true);
 
-      const role = await getUserRole();
-      setUserRole(role);
-
-      const response = await fetch('/api/inventory');
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error(data.error);
+      if (!form.item_name) {
+        alert("Item name required");
         return;
       }
 
-      setInventory(data);
+      if (editingId) {
+        const { error } = await supabase
+          .from("inventory_items")
+          .update({
+            ...form,
+          })
+          .eq("id", editingId);
+
+        if (error) {
+          alert(error.message);
+          return;
+        }
+
+        alert("Inventory updated");
+      } else {
+        const { error } = await supabase
+          .from("inventory_items")
+          .insert([
+            {
+              ...form,
+            },
+          ]);
+
+        if (error) {
+          alert(error.message);
+          return;
+        }
+
+        alert("Inventory item created");
+      }
+
+      resetForm();
+
+      fetchInventory();
     } catch (error) {
-      console.error('Error fetching inventory:', error);
+      console.log(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // ─────────────────────────────────────────────
+  // DELETE
+  // ─────────────────────────────────────────────
+  const deleteItem = async (id: string) => {
+    const confirmDelete = confirm(
+      "Delete this inventory item?"
+    );
 
-    try {
-      const url = editingId
-        ? `/api/inventory/${editingId}`
-        : '/api/inventory';
+    if (!confirmDelete) return;
 
-      const method = editingId ? 'PATCH' : 'POST';
+    const { error } = await supabase
+      .from("inventory_items")
+      .delete()
+      .eq("id", id);
 
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.error);
-        return;
-      }
-
-      await fetchData();
-      resetForm();
-    } catch (error) {
-      console.error('Error saving inventory item:', error);
+    if (error) {
+      alert(error.message);
+      return;
     }
+
+    fetchInventory();
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      category: '',
-      quantity: 0,
-      unit: '',
-      location: '',
-      status: 'available',
-    });
-    setShowForm(false);
-    setEditingId(null);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
-
-    try {
-      const response = await fetch(`/api/inventory/${id}`, {
-        method: 'DELETE',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.error);
-        return;
-      }
-
-      fetchData();
-    } catch (error) {
-      console.error('Error deleting inventory item:', error);
-    }
-  };
-
-  const handleEdit = (item: InventoryRecord) => {
-    setFormData({
-      name: item.item_name,
-      category: item.category || '',
-      quantity: item.quantity,
-      unit: item.unit || '',
-      location: item.location || '',
-      status: item.status,
-    });
-
+  // ─────────────────────────────────────────────
+  // EDIT
+  // ─────────────────────────────────────────────
+  const editItem = (item: InventoryItem) => {
     setEditingId(item.id);
-    setShowForm(true);
+
+    setForm({
+      item_name: item.item_name,
+      quantity: item.quantity,
+      status: item.status,
+      notes: item.notes || "",
+      category: item.category || "",
+      unit: item.unit || "",
+      location: item.location || "",
+    });
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
-  const canManage =
-    userRole === 'superadmin' ||
-    userRole === 'coordinator' ||
-    userRole === 'volunteer';
+  // ─────────────────────────────────────────────
+  // RESET
+  // ─────────────────────────────────────────────
+  const resetForm = () => {
+    setEditingId(null);
+
+    setForm({
+      item_name: "",
+      quantity: 0,
+      status: "available",
+      notes: "",
+      category: "",
+      unit: "",
+      location: "",
+    });
+  };
+
+  // ─────────────────────────────────────────────
+  // FILTER
+  // ─────────────────────────────────────────────
+  const filteredInventory = useMemo(() => {
+    return inventory.filter((item) =>
+      item.item_name
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
+  }, [inventory, search]);
 
   return (
-    <main className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* background */}
-      <div className="absolute top-0 left-0 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-pink-500/20 blur-[120px] sm:blur-[140px] rounded-full" />
-      <div className="absolute bottom-0 right-0 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-fuchsia-500/20 blur-[120px] sm:blur-[140px] rounded-full" />
+    <main className="min-h-screen bg-[#f8f6ff] p-4 md:p-8">
 
-      <div className="relative z-10 px-4 sm:px-6 md:px-12 py-6 sm:py-8">
-        {/* HEADER */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 sm:mb-12"
-        >
-          <div className="flex items-center gap-3 mb-3 sm:mb-4">
-            <Package className="text-pink-400" size={28} />
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-pink-400 via-fuchsia-500 to-orange-400 bg-clip-text text-transparent">
-              Inventory
-            </h1>
-          </div>
+      {/* HEADER */}
+      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
-          <p className="text-gray-400 text-sm sm:text-lg">
-            Manage hospitality resources and supplies
+        <div>
+          <h1 className="text-3xl font-black text-[#2b124c]">
+            Inventory Dashboard
+          </h1>
+
+          <p className="mt-2 text-[#5f4b7a]">
+            Manage hospitality inventory items.
           </p>
-        </motion.div>
+        </div>
 
-        {/* ADD BUTTON */}
-        {canManage && (
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-2xl mb-6 sm:mb-8"
-          >
-            <Plus size={18} />
-            {showForm ? 'Cancel' : 'Add Item'}
-          </button>
-        )}
+        {/* SEARCH */}
+        <div className="relative w-full md:w-[320px]">
 
-        {/* FORM */}
-        {showForm && canManage && (
-          <form
-            onSubmit={handleSubmit}
-            className="backdrop-blur-xl bg-white/5 border border-pink-500/20 rounded-3xl p-4 sm:p-6 md:p-8 mb-8"
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <input
-                placeholder="Item Name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="p-3 sm:p-4 rounded-xl bg-white/10 border border-pink-500/20"
-              />
+          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7d6b99]" />
 
-              <input
-                placeholder="Category"
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
-                }
-                className="p-3 sm:p-4 rounded-xl bg-white/10 border border-pink-500/20"
-              />
+          <input
+            type="text"
+            placeholder="Search inventory..."
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+            className="w-full rounded-2xl border border-[#ddd3f5] bg-white py-4 pl-11 pr-4 outline-none focus:border-[#8d5cf6]"
+          />
+        </div>
+      </div>
 
-              <input
-                type="number"
-                placeholder="Quantity"
-                value={formData.quantity}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    quantity: Number(e.target.value),
-                  })
-                }
-                className="p-3 sm:p-4 rounded-xl bg-white/10 border border-pink-500/20"
-              />
+      {/* FORM */}
+      <section className="rounded-[30px] border border-[#e5dbff] bg-white p-6 shadow-sm">
 
-              <input
-                placeholder="Unit"
-                value={formData.unit}
-                onChange={(e) =>
-                  setFormData({ ...formData, unit: e.target.value })
-                }
-                className="p-3 sm:p-4 rounded-xl bg-white/10 border border-pink-500/20"
-              />
+        <div className="mb-6 flex items-center gap-3">
 
-              <input
-                placeholder="Location"
-                value={formData.location}
-                onChange={(e) =>
-                  setFormData({ ...formData, location: e.target.value })
-                }
-                className="p-3 sm:p-4 rounded-xl bg-white/10 border border-pink-500/20 sm:col-span-2"
-              />
-
-              <select
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    status: e.target.value as any,
-                  })
-                }
-                className="p-3 sm:p-4 rounded-xl bg-white/10 border border-pink-500/20 sm:col-span-2"
-              >
-                <option value="available">Available</option>
-                <option value="in_use">In Use</option>
-                <option value="maintenance">Maintenance</option>
-                <option value="out_of_stock">Out of Stock</option>
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full mt-4 sm:mt-6 py-3 sm:py-4 bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-xl text-sm sm:text-base"
-            >
-              {editingId ? 'Update' : 'Add'} Item
-            </button>
-          </form>
-        )}
-
-        {/* GRID */}
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader className="animate-spin text-pink-400" size={40} />
+          <div className="rounded-2xl bg-[#efe7ff] p-3">
+            <Boxes className="h-6 w-6 text-[#6b3df0]" />
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {inventory.map((item) => (
-              <div
-                key={item.id}
-                className="backdrop-blur-xl bg-white/5 border border-pink-500/20 rounded-2xl p-4 sm:p-6"
-              >
-                <h3 className="text-lg sm:text-xl font-bold">
-                  {item.item_name}
-                </h3>
 
-                <p className="text-pink-400 text-sm">{item.category}</p>
-                <p className="text-gray-400 text-sm">
-                  Qty: {item.quantity} {item.unit}
-                </p>
+          <div>
+            <h2 className="text-2xl font-bold text-[#2b124c]">
+              {editingId
+                ? "Edit Inventory Item"
+                : "Create Inventory Item"}
+            </h2>
 
-                <div className="flex gap-2 mt-4">
-                  {canManage && (
-                    <>
-                      <button
-                        onClick={() => handleEdit(item)}
-                        className="flex-1 py-2 text-xs sm:text-sm bg-blue-500/20 rounded-lg"
-                      >
-                        Edit
-                      </button>
+            <p className="text-sm text-[#7d6b99]">
+              Add and manage stock items.
+            </p>
+          </div>
+        </div>
 
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="flex-1 py-2 text-xs sm:text-sm bg-red-500/20 rounded-lg"
-                      >
-                        Delete
-                      </button>
-                    </>
-                  )}
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+
+          <input
+            type="text"
+            placeholder="Item name"
+            value={form.item_name}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                item_name: e.target.value,
+              })
+            }
+            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+          />
+
+          <input
+            type="number"
+            placeholder="Quantity"
+            value={form.quantity}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                quantity: Number(e.target.value),
+              })
+            }
+            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+          />
+
+          <input
+            type="text"
+            placeholder="Category"
+            value={form.category}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                category: e.target.value,
+              })
+            }
+            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+          />
+
+          <input
+            type="text"
+            placeholder="Unit"
+            value={form.unit}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                unit: e.target.value,
+              })
+            }
+            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+          />
+
+          <input
+            type="text"
+            placeholder="Location"
+            value={form.location}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                location: e.target.value,
+              })
+            }
+            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+          />
+
+          <select
+            value={form.status}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                status: e.target.value,
+              })
+            }
+            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+          >
+            <option value="available">
+              Available
+            </option>
+
+            <option value="reserved">
+              Reserved
+            </option>
+
+            <option value="in-use">
+              In Use
+            </option>
+          </select>
+        </div>
+
+        <textarea
+          placeholder="Notes..."
+          value={form.notes}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              notes: e.target.value,
+            })
+          }
+          className="mt-4 min-h-[120px] w-full rounded-2xl border border-[#ddd3f5] p-4 outline-none"
+        />
+
+        <div className="mt-5 flex flex-wrap gap-4">
+
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-2xl bg-[#6b3df0] px-6 py-4 font-semibold text-white"
+          >
+            <Plus className="h-5 w-5" />
+
+            {editingId
+              ? "Update Item"
+              : "Create Item"}
+          </button>
+
+          {editingId && (
+            <button
+              onClick={resetForm}
+              className="rounded-2xl border border-[#ddd3f5] px-6 py-4 font-semibold text-[#2b124c]"
+            >
+              Cancel Editing
+            </button>
+          )}
+        </div>
+      </section>
+
+      {/* INVENTORY LIST */}
+      <section className="mt-10">
+
+        <h2 className="mb-5 text-2xl font-bold text-[#2b124c]">
+          Inventory Items
+        </h2>
+
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+
+          {filteredInventory.map((item) => (
+            <div
+              key={item.id}
+              className="rounded-[28px] border border-[#e5dbff] bg-white p-5"
+            >
+
+              <div className="flex items-start justify-between gap-4">
+
+                <div>
+                  <h3 className="text-xl font-bold text-[#2b124c]">
+                    {item.item_name}
+                  </h3>
+
+                  <p className="mt-2 text-sm text-[#6b3df0]">
+                    {item.category}
+                  </p>
+                </div>
+
+                <div className="rounded-full bg-[#efe7ff] px-3 py-1 text-xs font-semibold text-[#6b3df0]">
+                  {item.status}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+
+              <div className="mt-5 space-y-2 text-sm text-[#5f4b7a]">
+
+                <p>
+                  Quantity: {item.quantity}
+                </p>
+
+                <p>
+                  Unit: {item.unit || "N/A"}
+                </p>
+
+                <p>
+                  Location: {item.location || "N/A"}
+                </p>
+
+                <p>
+                  Notes: {item.notes || "None"}
+                </p>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+
+                <button
+                  onClick={() => editItem(item)}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#2b124c] px-4 py-3 text-sm font-semibold text-white"
+                >
+                  <Pencil className="h-4 w-4" />
+
+                  Edit
+                </button>
+
+                <button
+                  onClick={() =>
+                    deleteItem(item.id)
+                  }
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-3 text-sm font-semibold text-white"
+                >
+                  <Trash2 className="h-4 w-4" />
+
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }

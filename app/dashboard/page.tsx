@@ -245,23 +245,46 @@ export default function DashboardPage() {
           </Link>
 
           {/* GUESTS */}
-          <Link
-            href="/dashboard/guests"
-            className="group rounded-[32px] bg-white/5 border border-pink-500/10 p-8 hover:border-pink-500/30 transition-all"
-          >
-            <Hotel
-              className="text-pink-400 mb-5 group-hover:scale-110 transition-all"
-              size={34}
-            />
+          {role !== 'volunteer' && (
+            <Link
+              href="/dashboard/guests"
+              className="group rounded-[32px] bg-white/5 border border-pink-500/10 p-8 hover:border-pink-500/30 transition-all"
+            >
+              <Hotel
+                className="text-pink-400 mb-5 group-hover:scale-110 transition-all"
+                size={34}
+              />
 
-            <h2 className="text-3xl font-black">
-              Guests
-            </h2>
+              <h2 className="text-3xl font-black">
+                Guests
+              </h2>
 
-            <p className="text-gray-400 mt-4">
-              View guest accommodations and hospitality details.
-            </p>
-          </Link>
+              <p className="text-gray-400 mt-4">
+                View guest accommodations and hospitality details.
+              </p>
+            </Link>
+          )}
+
+          {/* EVENTS */}
+          {role !== 'event_head' && (
+            <Link
+              href="/dashboard/events"
+              className="group rounded-[32px] bg-white/5 border border-pink-500/10 p-8 hover:border-pink-500/30 transition-all"
+            >
+              <CalendarDays
+                className="text-pink-400 mb-5 group-hover:scale-110 transition-all"
+                size={34}
+              />
+
+              <h2 className="text-3xl font-black">
+                Events
+              </h2>
+
+              <p className="text-gray-400 mt-4">
+                Create and manage event plans and assignments.
+              </p>
+            </Link>
+          )}
 
           {/* INVENTORY */}
           <Link

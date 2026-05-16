@@ -1,420 +1,217 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Eye, EyeOff } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import type { UserRole } from "@/types/database.types";
 
 export default function LoginPage() {
   const router = useRouter();
 
-  const [isSignup, setIsSignup] = useState(false);
-
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
 
-  const [showPassword, setShowPassword] = useState(false);
+  // ─────────────────────────────────────────────
+  // REDIRECT IF ALREADY LOGGED IN (via localStorage)
+  // ─────────────────────────────────────────────
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("portal_email");
+    const savedRole = localStorage.getItem("portal_role");
 
-  const [formData, setFormData] = useState({
-    full_name: "",
-    email: "",
-    phone: "",
-    password: "",
-    role: "coordinator" as UserRole
-  });
+    if (savedEmail && savedRole) {
+      redirectByRole(savedRole);
+    }
+  }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  // ─────────────────────────────────────────────
+  // REDIRECT BY ROLE
+  // ─────────────────────────────────────────────
+  const redirectByRole = (role: string) => {
+    if (role === "admin") router.push("/dashboard/admin");
+    else if (role === "event_head") router.push("/dashboard/event-head");
+    else if (role === "core_team") router.push("/dashboard/core-team");
+    else router.push("/");
   };
-const redirectByRole = (role: UserRole) => {
-  switch (role) {
-    case "superadmin":
-    case "coordinator":
-    case "volunteer":
-      router.push("/dashboard");
-      break;
 
-    case "event_head":
-      router.push("/dashboard/my-guests");
-      break;
+  // ─────────────────────────────────────────────
+  // LOGIN — just check tables, no magic link
+  // ─────────────────────────────────────────────
+  const handleLogin = async () => {
+    const trimmedEmail = email.trim().toLowerCase();
 
-    default:
-      router.push("/");
-  }
-};
-  
-  const handleSignIn = async () => {
+    if (!trimmedEmail) {
+      alert("Please enter your email address.");
+      return;
+    }
+
     try {
       setLoading(true);
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      const user = data.user;
-
-      if (!user) {
-        alert("User not found");
-        return;
-      }
-
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
+      // CHECK ADMINS
+      const { data: admin } = await supabase
+        .from("admins")
+        .select("id")
+        .eq("email", trimmedEmail)
         .single();
 
-      if (profileError || !profile) {
-        alert("Profile not found");
+      if (admin) {
+        localStorage.setItem("portal_email", trimmedEmail);
+        localStorage.setItem("portal_role", "admin");
+        router.push("/dashboard/admin");
         return;
       }
 
-      // ROLE BASED REDIRECT
+      // CHECK EVENT HEADS
+      const { data: eventHead } = await supabase
+        .from("event_heads")
+        .select("id")
+        .eq("email", trimmedEmail)
+        .single();
 
-      switch (profile.role) {
-        case "superadmin":
-          router.push("/dashboard");
-          break;
-
-        case "coordinator":
-          router.push("/dashboard");
-          break;
-
-        case "volunteer":
-          router.push("/dashboard");
-          break;
-
-        case "event_head":
-          router.push("/dashboard/my-guests");
-          break;
-
-        default:
-          router.push("/");
+      if (eventHead) {
+        localStorage.setItem("portal_email", trimmedEmail);
+        localStorage.setItem("portal_role", "event_head");
+        router.push("/dashboard/event-head");
+        return;
       }
-    } catch (err) {
-      console.log(err);
-      alert("Something went wrong");
+
+      // CHECK CORE TEAM
+      const { data: coreMember } = await supabase
+        .from("core_team")
+        .select("id")
+        .eq("email", trimmedEmail)
+        .single();
+
+      if (coreMember) {
+        localStorage.setItem("portal_email", trimmedEmail);
+        localStorage.setItem("portal_role", "core_team");
+        router.push("/dashboard/core-team");
+        return;
+      }
+
+      // NOT FOUND IN ANY TABLE
+      alert("You are not authorized to access this portal.");
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  
-
-  const handleSignUp = async () => {
-    try {
-      setLoading(true);
-
-      // SECURITY CHECK
-      // NEVER ALLOW SUPERADMIN FROM FRONTEND
-
-      const allowedRoles = [
-        "coordinator",
-        "volunteer",
-        "event_head",
-      ];
-
-      if (!allowedRoles.includes(formData.role)) {
-        alert("Invalid role selected");
-        return;
-      }
-
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      const user = data.user;
-
-      if (!user) {
-        alert("User creation failed");
-        return;
-      }
-
-      // INSERT PROFILE
-
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert([
-          {
-            id: user.id,
-            full_name: formData.full_name,
-            email: formData.email,
-            phone: formData.phone,
-
-            // ONLY SAFE ROLES
-            role: formData.role,
-          },
-        ]);
-
-      if (profileError) {
-        console.log(profileError);
-        alert(profileError.message);
-        return;
-      }
-
-      alert("Account created successfully!");
-
-      // ROLE BASED REDIRECT AFTER SIGNUP
-
-      if (formData.role === "event_head") {
-        router.push("/dashboard/my-guests");
-      } else {
-        router.push("/dashboard");
-      }
-    } catch (err) {
-      console.log(err);
-      alert("Something went wrong");
-    } finally {
-      setLoading(false);
-    }
+  // ─────────────────────────────────────────────
+  // ALLOW SUBMIT ON ENTER KEY
+  // ─────────────────────────────────────────────
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") handleLogin();
   };
 
   return (
-    <main className="min-h-screen bg-black text-white overflow-hidden relative flex items-center justify-center px-6 py-10">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white px-6 py-10 text-[#0b0705]">
 
-      {/* Background Glow */}
-      <div className="absolute top-0 left-0 w-[450px] h-[450px] bg-pink-500/20 blur-[120px] rounded-full" />
+      {/* BACKGROUND */}
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,#d0e7dd,#fdcbca,#ebdbe6,#ffe8b5,#d8d0e8)] bg-[length:300%_300%] animate-[gradientShift_20s_ease_infinite]" />
 
-      <div className="absolute bottom-0 right-0 w-[450px] h-[450px] bg-fuchsia-500/20 blur-[120px] rounded-full" />
+      <div className="absolute left-[-120px] top-[-100px] h-[350px] w-[350px] rounded-full bg-[#f56483]/30 blur-3xl" />
+
+      <div className="absolute bottom-[-100px] right-[-100px] h-[350px] w-[350px] rounded-full bg-[#703c84]/20 blur-3xl" />
 
       {/* CARD */}
       <motion.div
-        initial={{ opacity: 0, y: 60 }}
+        initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10 w-full max-w-5xl grid md:grid-cols-2 rounded-[40px] overflow-hidden border border-pink-500/20 backdrop-blur-2xl bg-white/5 shadow-[0_0_50px_rgba(255,20,147,0.15)]"
+        className="relative z-10 w-full max-w-5xl overflow-hidden rounded-[40px] border border-white/40 bg-white/30 shadow-[0_20px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl md:grid md:grid-cols-2"
       >
 
         {/* LEFT */}
-        <div className="hidden md:flex flex-col justify-between p-8 lg:p-12 relative overflow-hidden bg-gradient-to-br from-pink-500/10 to-fuchsia-500/5">
+        <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-[#ebdbe6] to-[#fcc4b7] p-10 md:flex">
 
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,0,128,0.2),transparent_45%)]" />
+          <div>
+            <p className="text-sm uppercase tracking-[0.4em] text-[#703c84]">
+              Symphony in Shades
+            </p>
 
-          <div className="relative z-10">
-
-            <div className="flex items-center gap-4">
-
-              <Image
-                src="/logo.png"
-                alt="logo"
-                width={65}
-                height={65}
-                className="drop-shadow-[0_0_25px_rgba(255,20,147,0.8)]"
-              />
-
-              <h1 className="text-4xl font-black bg-gradient-to-r from-pink-400 via-fuchsia-500 to-orange-400 bg-clip-text text-transparent">
-                Paradox 2026
-              </h1>
-            </div>
-
-            <h2 className="text-3xl lg:text-5xl font-black leading-tight mt-12 lg:mt-16">
-              अतिथि
-              <br />
-
-              <span className="bg-gradient-to-r from-pink-400 via-fuchsia-500 to-orange-400 bg-clip-text text-transparent">
-                देवो भवः
+            <h1 className="mt-6 text-5xl font-black leading-tight text-[#703c84]">
+              Welcome
+              <span className="block bg-gradient-to-r from-[#f56483] to-[#703c84] bg-clip-text text-transparent">
+                Back
               </span>
-            </h2>
+            </h1>
 
-            <p className="text-gray-300 leading-relaxed mt-6 lg:mt-8 text-base lg:text-lg">
-              Every guest deserves warmth, comfort and respect.
-              Let us work together to create unforgettable experiences.
+            <p className="mt-8 max-w-md text-lg leading-9 text-[#3d3144]">
+              A monochrome world labels people.
+              Paradox celebrates every hidden spectrum within them.
             </p>
           </div>
 
-          <div className="relative z-10">
-            <p className="text-pink-400 text-lg italic">
-              “Hospitality is not a responsibility —
-              it is the soul of Paradox.”
-            </p>
-          </div>
+          <p className="italic text-[#703c84]">
+            "Your authentic self is contradictory to society's norms."
+          </p>
         </div>
 
         {/* RIGHT */}
-        <div className="p-6 sm:p-8 md:p-14 flex flex-col justify-center">
+        <div className="flex flex-col justify-center p-8 sm:p-12">
 
-          <div className="mb-10">
+          <p className="mb-4 text-sm uppercase tracking-[0.35em] text-[#703c84]">
+            Hospitality Portal
+          </p>
 
-            <p className="uppercase tracking-[0.35em] text-pink-400 text-sm mb-4">
-              Hospitality Portal
-            </p>
+          <h2 className="text-4xl font-black text-[#0b0705]">
+            Login
+          </h2>
 
-            <h2 className="text-3xl sm:text-4xl font-black">
-
-              {isSignup ? "Create Account" : "Welcome Back"}
-            </h2>
-
-            <p className="text-gray-400 mt-3">
-              {isSignup
-                ? "Join the hospitality team."
-                : "Sign in to continue."}
-            </p>
-          </div>
-
-          {/* SIGNUP ONLY */}
-          {isSignup && (
-            <>
-              <div className="mb-5">
-                <label className="text-sm text-gray-300 mb-2 block">
-                  Full Name
-                </label>
-
-                <input
-                  type="text"
-                  name="full_name"
-                  value={formData.full_name}
-                  onChange={handleChange}
-                  placeholder="Enter your name"
-                  className="w-full bg-black/40 border border-pink-500/20 focus:border-pink-500 rounded-2xl px-5 py-4 outline-none"
-                />
-              </div>
-
-              <div className="mb-5">
-                <label className="text-sm text-gray-300 mb-2 block">
-                  Contact Number
-                </label>
-
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="Enter contact number"
-                  className="w-full bg-black/40 border border-pink-500/20 focus:border-pink-500 rounded-2xl px-5 py-4 outline-none"
-                />
-              </div>
-
-              <div className="mb-5">
-                <label className="text-sm text-gray-300 mb-2 block">
-                  Select Role
-                </label>
-
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  className="w-full bg-black/40 border border-pink-500/20 focus:border-pink-500 rounded-2xl px-5 py-4 outline-none"
-                >
-                  <option value="coordinator">
-                    Coordinator
-                  </option>
-
-                  <option value="volunteer">
-                    Volunteer
-                  </option>
-
-                  <option value="event_head">
-                    Event Head
-                  </option>
-                </select>
-              </div>
-            </>
-          )}
+          <p className="mt-4 leading-8 text-[#3d3144]">
+            Enter your registered email address to continue.
+          </p>
 
           {/* EMAIL */}
-          <div className="mb-5">
-            <label className="text-sm text-gray-300 mb-2 block">
-              Email
+          <div className="mt-10">
+            <label className="mb-3 block text-sm font-medium text-[#3d3144]">
+              Email Address
             </label>
 
             <input
               type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter email"
-              className="w-full bg-black/40 border border-pink-500/20 focus:border-pink-500 rounded-2xl px-5 py-4 outline-none"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Enter your email"
+              className="w-full rounded-2xl border border-white/40 bg-white/50 px-5 py-4 outline-none backdrop-blur-md transition focus:border-[#703c84]"
             />
-          </div>
-
-          {/* PASSWORD */}
-          <div className="mb-7">
-            <label className="text-sm text-gray-300 mb-2 block">
-              Password
-            </label>
-
-            <div className="relative">
-
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter password"
-                className="w-full bg-black/40 border border-pink-500/20 focus:border-pink-500 rounded-2xl px-5 py-4 outline-none"
-              />
-
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400"
-              >
-                {showPassword ? <EyeOff /> : <Eye />}
-              </button>
-            </div>
           </div>
 
           {/* BUTTON */}
           <button
-            onClick={isSignup ? handleSignUp : handleSignIn}
+            onClick={handleLogin}
             disabled={loading}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-fuchsia-600 font-semibold hover:scale-[1.02] transition-all duration-300 shadow-[0_0_35px_rgba(255,20,147,0.4)]"
+            className="mt-8 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#f56483] px-6 py-4 font-semibold text-white shadow-[0_15px_40px_rgba(245,100,131,0.35)] transition duration-300 hover:scale-[1.02] hover:bg-[#ea4f74] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
-            {loading
-              ? "Please wait..."
-              : isSignup
-              ? "Create Account"
-              : "Sign In"}
+            {loading ? "Checking..." : "Continue"}
+
+            <ArrowRight className="h-4 w-4" />
           </button>
 
-          {/* TOGGLE */}
-          <div className="mt-8 text-center text-gray-400">
-
-            {isSignup ? (
-              <>
-                Already have an account?{" "}
-
-                <button
-                  onClick={() => setIsSignup(false)}
-                  className="text-pink-400 hover:text-pink-300"
-                >
-                  Sign In
-                </button>
-              </>
-            ) : (
-              <>
-                New here?{" "}
-
-                <button
-                  onClick={() => setIsSignup(true)}
-                  className="text-pink-400 hover:text-pink-300"
-                >
-                  Create Account
-                </button>
-              </>
-            )}
-          </div>
+          <p className="mt-6 text-sm leading-7 text-[#5b4a62]">
+            Only authorized members can access this portal.
+          </p>
         </div>
       </motion.div>
+
+      <style jsx global>{`
+        @keyframes gradientShift {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+      `}</style>
     </main>
   );
 }
