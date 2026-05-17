@@ -147,7 +147,7 @@ export default function LoginPage() {
             </h1>
 
             <p className="mt-8 max-w-md text-lg leading-9 text-[#3d3144]">
-              A monochrome world labels people.
+             
               Paradox celebrates every hidden spectrum within them.
             </p>
           </div>
