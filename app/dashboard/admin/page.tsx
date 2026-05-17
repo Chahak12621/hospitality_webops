@@ -316,6 +316,36 @@ export default function AdminDashboard() {
                             <MapPin className="h-3.5 w-3.5" />
                             {event.venue}
                           </div>
+                          {/* ASSIGNED MEMBER DISPLAY */}
+                          <div className="mt-5">
+                            <p className="text-xs uppercase tracking-[0.3em] text-[#703c84]">
+                              Assigned Core Team Member
+                            </p>
+
+                            {assignedMember ? (
+                              <div className="mt-2 flex flex-col gap-1 rounded-2xl bg-white/60 p-4 backdrop-blur-md">
+                                <p className="text-sm font-bold text-[#0b0705]">
+                                  {assignedMember.name}
+                                </p>
+
+                                <p className="text-xs text-[#703c84]">
+                                  {assignedMember.role} • {assignedMember.email}
+                                </p>
+
+                                <a
+                                  href={`tel:${assignedMember.contact_number}`}
+                                  className="mt-2 inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#f56483]"
+                                >
+                                  <Phone className="h-4 w-4" />
+                                  Call
+                                </a>
+                              </div>
+                            ) : (
+                              <div className="mt-2 rounded-2xl border border-dashed border-[#703c84]/30 bg-white/30 p-4 text-sm text-[#703c84]">
+                                No member assigned yet
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -323,6 +353,7 @@ export default function AdminDashboard() {
                 </div>
               );
             })}
+
 
             {filteredEvents.length === 0 && (
               <div className="rounded-[32px] border-2 border-dashed border-[#703c84]/20 bg-white/30 p-16 text-center text-[#703c84]">
@@ -361,8 +392,21 @@ export default function AdminDashboard() {
                 </p>
 
                 <p className="mt-1 text-sm text-[#703c84]">
-                  {member.department}
+                  {member.department || "No department"}
                 </p>
+
+                {/* ASSIGNED EVENT DISPLAY */}
+                <div className="mt-3">
+                  {member.assigned_event_id ? (
+                    <span className="inline-block rounded-full bg-[#d0e7dd]/50 px-3 py-1 text-xs font-semibold text-[#2b7a4b]">
+                      Assigned to Event
+                    </span>
+                  ) : (
+                    <span className="inline-block rounded-full bg-[#fdcbca]/50 px-3 py-1 text-xs font-semibold text-[#a33a3a]">
+                      Not Assigned
+                    </span>
+                  )}
+                </div>
 
                 <a
                   href={`tel:${member.contact_number}`}

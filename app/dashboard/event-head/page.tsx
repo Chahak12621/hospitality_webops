@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Pencil, Trash2, LogOut} from "lucide-react";
+import { Plus, Pencil, Trash2, LogOut } from "lucide-react";
 
 type EventType = {
   id: string;
@@ -35,6 +35,7 @@ export default function EventHeadDashboard() {
   const [events, setEvents] = useState<EventType[]>([]);
   const [guests, setGuests] = useState<GuestType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [coreTeam, setCoreTeam] = useState<any[]>([]);
 
   // CREATE EVENT FORM
   const [newEvent, setNewEvent] = useState({
@@ -77,21 +78,18 @@ export default function EventHeadDashboard() {
   // ─────────────────────────────────────────────
   const fetchMyEvents = async () => {
     try {
-      const email = sessionStorage.getItem(
-        "portal_email"
-      );
+      const email = sessionStorage.getItem("portal_email");
 
       if (!email) {
         setLoading(false);
         return;
       }
 
-      // FIND EVENT HEAD
-      const { data: head, error: headError } =
-        await supabase
-          .from("event_heads")
-          .select("assigned_event_id")
-          .eq("email", email);
+      // 1. GET EVENT HEAD RECORD
+      const { data: head, error: headError } = await supabase
+        .from("event_heads")
+        .select("assigned_event_id")
+        .eq("email", email);
 
       if (headError) {
         console.log(headError);
@@ -108,31 +106,28 @@ export default function EventHeadDashboard() {
         .map((item: any) => item.assigned_event_id)
         .filter(Boolean);
 
-      // FETCH EVENTS
-      const { data: eventData, error: eventError } =
-        await supabase
-          .from("events")
-          .select("*")
-          .in("id", eventIds);
-
-      if (eventError) {
-        console.log(eventError);
-      }
+      // 2. FETCH EVENTS
+      const { data: eventData } = await supabase
+        .from("events")
+        .select("*")
+        .in("id", eventIds);
 
       setEvents(eventData || []);
 
-      // FETCH GUESTS
-      const { data: guestData, error: guestError } =
-        await supabase
-          .from("guests")
-          .select("*")
-          .in("event_id", eventIds);
-
-      if (guestError) {
-        console.log(guestError);
-      }
+      // 3. FETCH GUESTS
+      const { data: guestData } = await supabase
+        .from("guests")
+        .select("*")
+        .in("event_id", eventIds);
 
       setGuests(guestData || []);
+
+      // 4. FETCH CORE TEAM (IMPORTANT FIX)
+      const { data: coreTeamData } = await supabase
+        .from("core_team")
+        .select("*");
+
+      setCoreTeam(coreTeamData || []);
     } catch (error) {
       console.log(error);
     } finally {
@@ -357,17 +352,17 @@ export default function EventHeadDashboard() {
           Manage your events and guests
         </p>
         <button
-              onClick={async () => {
-                await supabase.auth.signOut();
-                window.location.href = "/";
-              }}
-              className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </button>
+          onClick={async () => {
+            await supabase.auth.signOut();
+            window.location.href = "/";
+          }}
+          className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </button>
       </div>
-      
+
 
       {/* CREATE EVENT */}
       <div className="mb-10 rounded-[30px] border border-[#e5dcff] bg-white p-6">
@@ -478,6 +473,9 @@ export default function EventHeadDashboard() {
       <div className="grid gap-8">
 
         {events.map((event) => {
+          const assignedMember = coreTeam.find(
+            (m) => m.assigned_event_id === event.id
+          );
 
           const eventGuests = guests.filter(
             (guest) => guest.event_id === event.id
@@ -609,6 +607,28 @@ export default function EventHeadDashboard() {
                       <Trash2 className="h-4 w-4" />
                       Delete
                     </button>
+                  </div>
+                  <div className="mt-6 rounded-xl border border-[#ddd2ff] bg-white p-4">
+                    <h4 className="text-sm font-bold text-[#2b124c]">
+                      Assigned Core Member
+                    </h4>
+
+                    {assignedMember ? (
+                      <div className="mt-2 text-sm text-[#3d3144]">
+                        <p className="font-semibold">{assignedMember.name}</p>
+                        <p>{assignedMember.email}</p>
+                        <a
+                          href={`tel:${assignedMember.contact_number}`}
+                          className="text-[#6b3df0] underline"
+                        >
+                          Call
+                        </a>
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-sm text-gray-500">
+                        Not assigned yet
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -759,9 +779,9 @@ export default function EventHeadDashboard() {
                               prev.map((item) =>
                                 item.id === guest.id
                                   ? {
-                                      ...item,
-                                      guest_food_preferences: e.target.value,
-                                    }
+                                    ...item,
+                                    guest_food_preferences: e.target.value,
+                                  }
                                   : item
                               )
                             )
