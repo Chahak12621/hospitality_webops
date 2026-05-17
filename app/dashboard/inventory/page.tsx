@@ -9,6 +9,7 @@ import {
   Trash2,
   Search,
   Boxes,
+  LogOut,
 } from "lucide-react";
 
 type InventoryItem = {
@@ -203,6 +204,7 @@ export default function InventoryDashboard() {
             Manage hospitality inventory items.
           </p>
         </div>
+        
 
         {/* SEARCH */}
         <div className="relative w-full md:w-[320px]">
@@ -219,10 +221,100 @@ export default function InventoryDashboard() {
             className="w-full rounded-2xl border border-[#ddd3f5] bg-white py-4 pl-11 pr-4 outline-none focus:border-[#8d5cf6]"
           />
         </div>
+        <button
+                      onClick={async () => {
+                        await supabase.auth.signOut();
+                        window.location.href = "/";
+                      }}
+                      className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </button>
       </div>
+      
 
+      
+
+      {/* INVENTORY LIST */}
+      <section className="mt-10">
+
+        <h2 className="mb-5 text-2xl font-bold text-[#2b124c]">
+          Inventory Items
+        </h2>
+
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+
+          {filteredInventory.map((item) => (
+            <div
+              key={item.id}
+              className="rounded-[28px] border border-[#e5dbff] bg-white p-5"
+            >
+
+              <div className="flex items-start justify-between gap-4">
+
+                <div>
+                  <h3 className="text-xl font-bold text-[#2b124c]">
+                    {item.item_name}
+                  </h3>
+
+                  <p className="mt-2 text-sm text-[#6b3df0]">
+                    {item.category}
+                  </p>
+                </div>
+
+                <div className="rounded-full bg-[#efe7ff] px-3 py-1 text-xs font-semibold text-[#6b3df0]">
+                  {item.status}
+                </div>
+              </div>
+
+              <div className="mt-5 space-y-2 text-sm text-[#5f4b7a]">
+
+                <p>
+                  Quantity: {item.quantity}
+                </p>
+
+                <p>
+                  Unit: {item.unit || "N/A"}
+                </p>
+
+                <p>
+                  Location: {item.location || "N/A"}
+                </p>
+
+                <p>
+                  Notes: {item.notes || "None"}
+                </p>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+
+                <button
+                  onClick={() => editItem(item)}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#2b124c] px-4 py-3 text-sm font-semibold text-white"
+                >
+                  <Pencil className="h-4 w-4" />
+
+                  Edit
+                </button>
+
+                <button
+                  onClick={() =>
+                    deleteItem(item.id)
+                  }
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-3 text-sm font-semibold text-white"
+                >
+                  <Trash2 className="h-4 w-4" />
+
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
       {/* FORM */}
-      <section className="rounded-[30px] border border-[#e5dbff] bg-white p-6 shadow-sm">
+      <section className="rounded-[30px] border border-[#e5dbff] bg-white p-6 shadow-sm margintop-10">
 
         <div className="mb-6 flex items-center gap-3">
 
@@ -368,84 +460,6 @@ export default function InventoryDashboard() {
               Cancel Editing
             </button>
           )}
-        </div>
-      </section>
-
-      {/* INVENTORY LIST */}
-      <section className="mt-10">
-
-        <h2 className="mb-5 text-2xl font-bold text-[#2b124c]">
-          Inventory Items
-        </h2>
-
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-
-          {filteredInventory.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-[28px] border border-[#e5dbff] bg-white p-5"
-            >
-
-              <div className="flex items-start justify-between gap-4">
-
-                <div>
-                  <h3 className="text-xl font-bold text-[#2b124c]">
-                    {item.item_name}
-                  </h3>
-
-                  <p className="mt-2 text-sm text-[#6b3df0]">
-                    {item.category}
-                  </p>
-                </div>
-
-                <div className="rounded-full bg-[#efe7ff] px-3 py-1 text-xs font-semibold text-[#6b3df0]">
-                  {item.status}
-                </div>
-              </div>
-
-              <div className="mt-5 space-y-2 text-sm text-[#5f4b7a]">
-
-                <p>
-                  Quantity: {item.quantity}
-                </p>
-
-                <p>
-                  Unit: {item.unit || "N/A"}
-                </p>
-
-                <p>
-                  Location: {item.location || "N/A"}
-                </p>
-
-                <p>
-                  Notes: {item.notes || "None"}
-                </p>
-              </div>
-
-              <div className="mt-6 flex gap-3">
-
-                <button
-                  onClick={() => editItem(item)}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#2b124c] px-4 py-3 text-sm font-semibold text-white"
-                >
-                  <Pencil className="h-4 w-4" />
-
-                  Edit
-                </button>
-
-                <button
-                  onClick={() =>
-                    deleteItem(item.id)
-                  }
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-3 text-sm font-semibold text-white"
-                >
-                  <Trash2 className="h-4 w-4" />
-
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
     </main>

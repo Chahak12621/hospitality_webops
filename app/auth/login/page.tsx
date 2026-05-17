@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -9,102 +9,108 @@ import { supabase } from "@/lib/supabase";
 export default function LoginPage() {
   const router = useRouter();
 
-  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // ─────────────────────────────────────────────
-  // REDIRECT IF ALREADY LOGGED IN (via localStorage)
-  // ─────────────────────────────────────────────
-  useEffect(() => {
-    const savedEmail = localStorage.getItem("portal_email");
-    const savedRole = localStorage.getItem("portal_role");
-
-    if (savedEmail && savedRole) {
-      redirectByRole(savedRole);
-    }
-  }, []);
-
-  // ─────────────────────────────────────────────
-  // REDIRECT BY ROLE
-  // ─────────────────────────────────────────────
-  const redirectByRole = (role: string) => {
-    if (role === "admin") router.push("/dashboard/admin");
-    else if (role === "event_head") router.push("/dashboard/event-head");
-    else if (role === "core_team") router.push("/dashboard/core-team");
-    else router.push("/");
-  };
-
-  // ─────────────────────────────────────────────
-  // LOGIN — just check tables, no magic link
+  // LOGIN
   // ─────────────────────────────────────────────
   const handleLogin = async () => {
     const trimmedEmail = email.trim().toLowerCase();
 
     if (!trimmedEmail) {
-      alert("Please enter your email address.");
+      alert("Please enter email");
       return;
     }
 
     try {
       setLoading(true);
 
-      // CHECK ADMINS
+      // ───────── CHECK ADMIN ─────────
       const { data: admin } = await supabase
         .from("admins")
-        .select("id")
+        .select("*")
         .eq("email", trimmedEmail)
-        .single();
+        .maybeSingle();
 
       if (admin) {
-        localStorage.setItem("portal_email", trimmedEmail);
-        localStorage.setItem("portal_role", "admin");
+        sessionStorage.setItem(
+          "portal_email",
+          trimmedEmail
+        );
+
+        sessionStorage.setItem(
+          "portal_role",
+          "admin"
+        );
+
         router.push("/dashboard/admin");
         return;
       }
 
-      // CHECK EVENT HEADS
+      // ───────── CHECK EVENT HEAD ─────────
       const { data: eventHead } = await supabase
         .from("event_heads")
-        .select("id")
+        .select("*")
         .eq("email", trimmedEmail)
-        .single();
+        .maybeSingle();
 
       if (eventHead) {
-        localStorage.setItem("portal_email", trimmedEmail);
-        localStorage.setItem("portal_role", "event_head");
+        sessionStorage.setItem(
+          "portal_email",
+          trimmedEmail
+        );
+
+        sessionStorage.setItem(
+          "portal_role",
+          "event_head"
+        );
+
         router.push("/dashboard/event-head");
         return;
       }
 
-      // CHECK CORE TEAM
+      // ───────── CHECK CORE TEAM ─────────
       const { data: coreMember } = await supabase
         .from("core_team")
-        .select("id")
+        .select("*")
         .eq("email", trimmedEmail)
-        .single();
+        .maybeSingle();
 
       if (coreMember) {
-        localStorage.setItem("portal_email", trimmedEmail);
-        localStorage.setItem("portal_role", "core_team");
+        sessionStorage.setItem(
+          "portal_email",
+          trimmedEmail
+        );
+
+        sessionStorage.setItem(
+          "portal_role",
+          "core_team"
+        );
+
         router.push("/dashboard/core-team");
         return;
       }
 
-      // NOT FOUND IN ANY TABLE
-      alert("You are not authorized to access this portal.");
+      // ───────── NO ACCESS ─────────
+      alert("You are not authorized");
     } catch (error) {
-      console.error(error);
-      alert("Something went wrong. Please try again.");
+      console.log(error);
+      alert("Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
   // ─────────────────────────────────────────────
-  // ALLOW SUBMIT ON ENTER KEY
+  // ENTER KEY
   // ─────────────────────────────────────────────
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") handleLogin();
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Enter") {
+      handleLogin();
+    }
   };
 
   return (
@@ -163,11 +169,12 @@ export default function LoginPage() {
           </h2>
 
           <p className="mt-4 leading-8 text-[#3d3144]">
-            Enter your registered email address to continue.
+            Enter your registered email address.
           </p>
 
           {/* EMAIL */}
           <div className="mt-10">
+
             <label className="mb-3 block text-sm font-medium text-[#3d3144]">
               Email Address
             </label>
@@ -175,9 +182,12 @@ export default function LoginPage() {
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
               onKeyDown={handleKeyDown}
               placeholder="Enter your email"
+              autoComplete="off"
               className="w-full rounded-2xl border border-white/40 bg-white/50 px-5 py-4 outline-none backdrop-blur-md transition focus:border-[#703c84]"
             />
           </div>
@@ -186,7 +196,7 @@ export default function LoginPage() {
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="mt-8 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#f56483] px-6 py-4 font-semibold text-white shadow-[0_15px_40px_rgba(245,100,131,0.35)] transition duration-300 hover:scale-[1.02] hover:bg-[#ea4f74] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="mt-8 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#f56483] px-6 py-4 font-semibold text-white shadow-[0_15px_40px_rgba(245,100,131,0.35)] transition duration-300 hover:scale-[1.02] hover:bg-[#ea4f74]"
           >
             {loading ? "Checking..." : "Continue"}
 
@@ -204,9 +214,11 @@ export default function LoginPage() {
           0% {
             background-position: 0% 50%;
           }
+
           50% {
             background-position: 100% 50%;
           }
+
           100% {
             background-position: 0% 50%;
           }

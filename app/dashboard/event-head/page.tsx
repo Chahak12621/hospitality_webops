@@ -2,16 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Phone,
-  Mail,
-  CalendarDays,
-  MapPin,
-  Users,
-} from "lucide-react";
+import { Plus, Pencil, Trash2, LogOut} from "lucide-react";
 
 type EventType = {
   id: string;
@@ -71,6 +62,13 @@ export default function EventHeadDashboard() {
   });
 
   useEffect(() => {
+    const role = sessionStorage.getItem("portal_role");
+
+    if (role !== "event_head") {
+      window.location.href = "/login";
+      return;
+    }
+
     fetchMyEvents();
   }, []);
 
@@ -78,49 +76,63 @@ export default function EventHeadDashboard() {
   // FETCH ONLY MY EVENTS
   // ─────────────────────────────────────────────
   const fetchMyEvents = async () => {
-
     try {
+      const email = sessionStorage.getItem(
+        "portal_email"
+      );
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user?.email) {
+      if (!email) {
         setLoading(false);
         return;
       }
 
       // FIND EVENT HEAD
-      const { data: head } = await supabase
-        .from("event_heads")
-        .select("assigned_event_id")
-        .eq("email", user.email);
+      const { data: head, error: headError } =
+        await supabase
+          .from("event_heads")
+          .select("assigned_event_id")
+          .eq("email", email);
+
+      if (headError) {
+        console.log(headError);
+        setLoading(false);
+        return;
+      }
 
       if (!head || head.length === 0) {
         setLoading(false);
         return;
       }
 
-      const eventIds = head.map(
-        (item: any) => item.assigned_event_id
-      );
+      const eventIds = head
+        .map((item: any) => item.assigned_event_id)
+        .filter(Boolean);
 
       // FETCH EVENTS
-      const { data: eventData } = await supabase
-        .from("events")
-        .select("*")
-        .in("id", eventIds);
+      const { data: eventData, error: eventError } =
+        await supabase
+          .from("events")
+          .select("*")
+          .in("id", eventIds);
+
+      if (eventError) {
+        console.log(eventError);
+      }
 
       setEvents(eventData || []);
 
       // FETCH GUESTS
-      const { data: guestData } = await supabase
-        .from("guests")
-        .select("*")
-        .in("event_id", eventIds);
+      const { data: guestData, error: guestError } =
+        await supabase
+          .from("guests")
+          .select("*")
+          .in("event_id", eventIds);
+
+      if (guestError) {
+        console.log(guestError);
+      }
 
       setGuests(guestData || []);
-
     } catch (error) {
       console.log(error);
     } finally {
@@ -132,12 +144,14 @@ export default function EventHeadDashboard() {
   // CREATE EVENT
   // ─────────────────────────────────────────────
   const createEvent = async () => {
+    const email = sessionStorage.getItem(
+      "portal_email"
+    );
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user?.email) return;
+    if (!email) {
+      alert("Unauthorized");
+      return;
+    }
 
     const { data, error } = await supabase
       .from("events")
@@ -151,14 +165,28 @@ export default function EventHeadDashboard() {
     }
 
     // LINK EVENT TO EVENT HEAD
-    await supabase
+    const { error: updateError } = await supabase
       .from("event_heads")
       .update({
         assigned_event_id: data.id,
       })
-      .eq("email", user.email);
+      .eq("email", email);
+
+    if (updateError) {
+      alert(updateError.message);
+      return;
+    }
 
     alert("Event created");
+
+    setNewEvent({
+      event_name: "",
+      department: "technical",
+      description: "",
+      event_date: "",
+      event_time: "",
+      venue: "",
+    });
 
     fetchMyEvents();
   };
@@ -328,7 +356,18 @@ export default function EventHeadDashboard() {
         <p className="mt-3 text-[#6f5b8e]">
           Manage your events and guests
         </p>
+        <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = "/";
+              }}
+              className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </button>
       </div>
+      
 
       {/* CREATE EVENT */}
       <div className="mb-10 rounded-[30px] border border-[#e5dcff] bg-white p-6">
@@ -460,8 +499,16 @@ export default function EventHeadDashboard() {
                     <input
                       value={event.event_name}
                       onChange={(e) =>
-                        event.event_name =
-                          e.target.value
+                        setEvents((prev) =>
+                          prev.map((item) =>
+                            item.id === event.id
+                              ? {
+                                ...item,
+                                event_name: e.target.value,
+                              }
+                              : item
+                          )
+                        )
                       }
                       className="w-full bg-transparent text-3xl font-black outline-none"
                     />
@@ -469,8 +516,16 @@ export default function EventHeadDashboard() {
                     <textarea
                       value={event.description}
                       onChange={(e) =>
-                        event.description =
-                          e.target.value
+                        setEvents((prev) =>
+                          prev.map((item) =>
+                            item.id === event.id
+                              ? {
+                                ...item,
+                                description: e.target.value,
+                              }
+                              : item
+                          )
+                        )
                       }
                       className="mt-4 min-h-[100px] w-full bg-transparent outline-none"
                     />
@@ -481,8 +536,16 @@ export default function EventHeadDashboard() {
                         type="date"
                         value={event.event_date}
                         onChange={(e) =>
-                          event.event_date =
-                            e.target.value
+                          setEvents((prev) =>
+                            prev.map((item) =>
+                              item.id === event.id
+                                ? {
+                                  ...item,
+                                  event_date: e.target.value,
+                                }
+                                : item
+                            )
+                          )
                         }
                         className="rounded-xl bg-white/20 px-4 py-3 outline-none"
                       />
@@ -491,8 +554,16 @@ export default function EventHeadDashboard() {
                         type="time"
                         value={event.event_time}
                         onChange={(e) =>
-                          event.event_time =
-                            e.target.value
+                          setEvents((prev) =>
+                            prev.map((item) =>
+                              item.id === event.id
+                                ? {
+                                  ...item,
+                                  event_time: e.target.value,
+                                }
+                                : item
+                            )
+                          )
                         }
                         className="rounded-xl bg-white/20 px-4 py-3 outline-none"
                       />
@@ -500,8 +571,16 @@ export default function EventHeadDashboard() {
                       <input
                         value={event.venue}
                         onChange={(e) =>
-                          event.venue =
-                            e.target.value
+                          setEvents((prev) =>
+                            prev.map((item) =>
+                              item.id === event.id
+                                ? {
+                                  ...item,
+                                  venue: e.target.value,
+                                }
+                                : item
+                            )
+                          )
                         }
                         placeholder="Venue"
                         className="rounded-xl bg-white/20 px-4 py-3 outline-none"
@@ -623,8 +702,16 @@ export default function EventHeadDashboard() {
                         <input
                           value={guest.guest_name}
                           onChange={(e) =>
-                            guest.guest_name =
-                              e.target.value
+                            setGuests((prev) =>
+                              prev.map((item) =>
+                                item.id === guest.id
+                                  ? {
+                                    ...item,
+                                    guest_name: e.target.value,
+                                  }
+                                  : item
+                              )
+                            )
                           }
                           className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                         />
@@ -632,8 +719,16 @@ export default function EventHeadDashboard() {
                         <input
                           value={guest.guest_email}
                           onChange={(e) =>
-                            guest.guest_email =
-                              e.target.value
+                            setGuests((prev) =>
+                              prev.map((item) =>
+                                item.id === guest.id
+                                  ? {
+                                    ...item,
+                                    guest_email: e.target.value,
+                                  }
+                                  : item
+                              )
+                            )
                           }
                           className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                         />
@@ -641,8 +736,16 @@ export default function EventHeadDashboard() {
                         <input
                           value={guest.guest_phone}
                           onChange={(e) =>
-                            guest.guest_phone =
-                              e.target.value
+                            setGuests((prev) =>
+                              prev.map((item) =>
+                                item.id === guest.id
+                                  ? {
+                                    ...item,
+                                    guest_phone: e.target.value,
+                                  }
+                                  : item
+                              )
+                            )
                           }
                           className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                         />
@@ -652,8 +755,16 @@ export default function EventHeadDashboard() {
                             guest.guest_food_preferences
                           }
                           onChange={(e) =>
-                            guest.guest_food_preferences =
-                              e.target.value
+                            setGuests((prev) =>
+                              prev.map((item) =>
+                                item.id === guest.id
+                                  ? {
+                                      ...item,
+                                      guest_food_preferences: e.target.value,
+                                    }
+                                  : item
+                              )
+                            )
                           }
                           className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                         />

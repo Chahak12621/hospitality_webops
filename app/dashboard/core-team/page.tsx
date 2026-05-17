@@ -10,6 +10,8 @@ import {
   Users,
   Utensils,
   BedDouble,
+  LayoutDashboard,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -52,53 +54,51 @@ export default function CoreTeamDashboard() {
 
   const fetchAssignedEvents = async () => {
     try {
-      // CURRENT AUTH USER
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      // GET EMAIL FROM SESSION STORAGE
+      const email = sessionStorage.getItem("portal_email");
 
-      if (!user?.email) {
+      if (!email) {
         setLoading(false);
         return;
       }
 
-      // FIND EVENT HEAD ENTRY
       // FIND CORE TEAM MEMBER
-const { data: member, error: memberError } = await supabase
-  .from("core_team")
-  .select(`
-    assigned_event_id
-  `)
-  .eq("email", user.email)
-  .single();
+      const { data: member, error: memberError } = await supabase
+        .from("core_team")
+        .select("assigned_event_id")
+        .eq("email", email)
+        .single();
 
-if (memberError || !member?.assigned_event_id) {
-  setLoading(false);
-  return;
-}
+      if (memberError || !member?.assigned_event_id) {
+        console.log(memberError);
+        setLoading(false);
+        return;
+      }
 
-// FETCH ONLY ASSIGNED EVENT
-const { data: eventData, error: eventError } =
-  await supabase
-    .from("events")
-    .select("*")
-    .eq("id", member.assigned_event_id)
-    .single();
+      // FETCH ASSIGNED EVENT
+      const { data: eventData, error: eventError } = await supabase
+        .from("events")
+        .select("*")
+        .eq("id", member.assigned_event_id)
+        .single();
 
-if (eventError || !eventData) {
-  setLoading(false);
-  return;
-}
+      if (eventError || !eventData) {
+        console.log(eventError);
+        setLoading(false);
+        return;
+      }
 
-setEvents([eventData]);
+      setEvents([eventData]);
 
-// FETCH GUESTS OF THAT EVENT ONLY
-const { data: guestData } = await supabase
-  .from("guests")
-  .select("*")
-  .eq("event_id", eventData.id);
+      // FETCH GUESTS OF THAT EVENT
+      const { data: guestData, error: guestError } = await supabase
+        .from("guests")
+        .select("*")
+        .eq("event_id", eventData.id);
 
-setGuests(guestData || []);
+      if (guestError) {
+        console.log(guestError);
+      }
 
       setGuests(guestData || []);
     } catch (error) {
@@ -113,308 +113,382 @@ setGuests(guestData || []);
   // ─────────────────────────────────────────────
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f8f6ff]">
-        <div className="text-lg font-semibold text-[#5f4b7a]">
-          Loading dashboard...
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white">
+        <div className="fixed inset-0 -z-10 bg-[linear-gradient(135deg,#d0e7dd,#fdcbca,#ebdbe6,#ffe8b5,#d8d0e8)] bg-[length:300%_300%] animate-[gradientShift_20s_ease_infinite]" />
+        <div className="rounded-[28px] border border-white/50 bg-white/60 px-12 py-10 text-center shadow-[0_20px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl">
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-[#703c84]/20 border-t-[#703c84]" />
+          <p className="text-base font-semibold text-[#703c84]">Loading dashboard...</p>
         </div>
+        <style jsx global>{`
+          @keyframes gradientShift {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+          }
+        `}</style>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#f8f6ff] p-4 md:p-8">
+    <main className="relative min-h-screen overflow-hidden bg-white text-[#0b0705]">
+      {/* Animated Gradient Background */}
+      <div className="fixed inset-0 -z-10 bg-[linear-gradient(135deg,#d0e7dd,#fdcbca,#ebdbe6,#ffe8b5,#d8d0e8)] bg-[length:300%_300%] animate-[gradientShift_20s_ease_infinite]" />
+      <div className="fixed left-[-120px] top-[-100px] -z-10 h-[400px] w-[400px] rounded-full bg-[#f56483]/20 blur-3xl" />
+      <div className="fixed right-[-120px] bottom-[-100px] -z-10 h-[400px] w-[400px] rounded-full bg-[#703c84]/15 blur-3xl" />
 
-      {/* HEADER */}
-      <div className="mb-10">
+      {/* ── NAVBAR ── */}
+      <nav className="sticky top-0 z-30 border-b border-white/40 bg-white/40 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
 
-        <h1 className="text-3xl font-black text-[#2b124c]">
-          Core Team Dashboard
-        </h1>
+          {/* Left — Logo + Title */}
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" className="h-full w-full">
+                <defs>
+                  <radialGradient id="ctLogoGrad" cx="45%" cy="40%" r="60%">
+                    <stop offset="0%" stopColor="#f56483" />
+                    <stop offset="60%" stopColor="#703c84" />
+                    <stop offset="100%" stopColor="#4a1a6b" />
+                  </radialGradient>
+                  <radialGradient id="ctRingGrad" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#8b3fa8" />
+                    <stop offset="100%" stopColor="#4a1060" />
+                  </radialGradient>
+                </defs>
+                <circle cx="100" cy="100" r="98" fill="url(#ctRingGrad)" />
+                <circle cx="100" cy="100" r="90" fill="url(#ctLogoGrad)" />
+                {[
+                  [100, 60, 2], [120, 65, 2], [135, 78, 2.5], [140, 95, 2.5],
+                  [135, 112, 2.5], [125, 126, 3], [112, 136, 3], [95, 140, 3.5],
+                  [78, 136, 3.5], [64, 126, 4], [58, 112, 4], [58, 95, 4],
+                  [64, 78, 4.5], [78, 66, 4.5],
+                ].map(([cx, cy, r], i) => (
+                  <circle key={i} cx={cx} cy={cy} r={r} fill="rgba(255,255,255,0.9)" />
+                ))}
+                <circle cx="100" cy="100" r="5" fill="rgba(255,255,255,0.6)" />
+                <text x="100" y="88" textAnchor="middle" fontSize="9" fontWeight="600" fill="white" letterSpacing="2">
+                  IIT MADRAS
+                </text>
+                <text x="100" y="108" textAnchor="middle" fontSize="20" fontWeight="900" fill="white" letterSpacing="1">
+                  PARADOX
+                </text>
+              </svg>
+            </div>
 
-        <p className="mt-3 max-w-2xl leading-8 text-[#5f4b7a]">
-          View your assigned events and manage guest hospitality details.
-        </p>
-      </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-[#703c84]">
+                Paradox '26 · Hospitality
+              </p>
+              <div className="flex items-center gap-2">
+                <LayoutDashboard className="h-4 w-4 text-[#f56483]" />
+                <h1 className="text-xl font-black tracking-tight text-[#0b0705]">
+                  Core Team Dashboard
+                </h1>
+              </div>
+            </div>
+          </div>
 
-      {/* NO EVENTS */}
-      {events.length === 0 && (
-        <div className="rounded-[28px] border border-dashed border-[#d8cfff] bg-white p-12 text-center">
+          {/* Right — Inventory + Logout */}
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard/inventory"
+              className="rounded-full border-2 border-[#703c84] bg-white/40 px-5 py-2.5 text-sm font-semibold text-[#703c84] backdrop-blur-md transition duration-300 hover:scale-105 hover:bg-white/70"
+            >
+              Inventory
+            </Link>
 
-          <h2 className="text-2xl font-bold text-[#2b124c]">
-            No Events Assigned
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = "/";
+              }}
+              className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* ── MAIN CONTENT ── */}
+      <div className="mx-auto max-w-7xl px-6 py-10">
+
+        {/* Page Intro */}
+        <div className="mb-10">
+          <p className="text-xs uppercase tracking-[0.4em] text-[#703c84]">Your Assignment</p>
+          <h2 className="mt-1 text-3xl font-black text-[#0b0705]">
+            Assigned Events &amp; Guests
           </h2>
-
-          <p className="mt-3 text-[#6f5b8e]">
-            You currently do not have any assigned events.
+          <p className="mt-3 max-w-2xl leading-8 text-[#3d3144]">
+            View your assigned events and manage guest hospitality details.
           </p>
         </div>
-      )}
-      <Link
-        href="/dashboard/inventory"
-        className="rounded-xl bg-[#6b3df0] px-5 py-3 text-sm font-semibold text-white"
-      >
-        Inventory Dashboard
-      </Link>
-      {/* EVENTS */}
-      <div className="grid gap-8">
 
-        {events.map((event) => {
-          const eventGuests = guests.filter(
-            (guest: any) => guest.event_id === event.id
-          );
+        {/* NO EVENTS */}
+        {events.length === 0 && (
+          <div className="rounded-[32px] border-2 border-dashed border-[#703c84]/20 bg-white/30 p-16 text-center backdrop-blur-md">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#ebdbe6] to-[#d8d0e8]">
+              <CalendarDays className="h-8 w-8 text-[#703c84]" />
+            </div>
+            <h2 className="text-2xl font-black text-[#703c84]">No Events Assigned</h2>
+            <p className="mt-3 text-[#3d3144]">
+              You currently do not have any assigned events.
+            </p>
+          </div>
+        )}
 
-          return (
-            <div
-              key={event.id}
-              className="overflow-hidden rounded-[32px] border border-[#e7ddff] bg-white shadow-sm"
-            >
+        {/* ── EVENTS ── */}
+        <div className="grid gap-8">
+          {events.map((event) => {
+            const eventGuests = guests.filter(
+              (guest: any) => guest.event_id === event.id
+            );
 
-              {/* EVENT HEADER */}
-              <div className="bg-gradient-to-r from-[#6b3df0] to-[#8f6dff] p-6 text-white">
+            return (
+              <div
+                key={event.id}
+                className="overflow-hidden rounded-[32px] border border-white/50 bg-white/40 shadow-[0_20px_60px_rgba(0,0,0,0.08)] backdrop-blur-md"
+              >
+                {/* ── EVENT HEADER BANNER ── */}
+                <div className="relative overflow-hidden bg-gradient-to-r from-[#703c84] to-[#f56483] p-8 text-white">
+                  {/* Decorative orb */}
+                  <div className="absolute right-[-60px] top-[-60px] h-[200px] w-[200px] rounded-full bg-white/10 blur-2xl" />
+                  <div className="absolute bottom-[-40px] left-[30%] h-[150px] w-[150px] rounded-full bg-white/10 blur-2xl" />
 
-                <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-
-                  <div>
-
-                    <div className="flex flex-wrap items-center gap-3">
-
-                      <h2 className="text-3xl font-black">
-                        {event.event_name}
-                      </h2>
-
-                      <span className="rounded-full bg-white/20 px-4 py-1 text-sm font-semibold">
-                        {event.department}
-                      </span>
+                  <div className="relative flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h2 className="text-3xl font-black">{event.event_name}</h2>
+                        <span className="rounded-full bg-white/20 px-4 py-1 text-sm font-semibold backdrop-blur-sm">
+                          {event.department}
+                        </span>
+                      </div>
+                      <p className="mt-4 max-w-3xl leading-8 text-white/90">{event.description}</p>
                     </div>
+                  </div>
 
-                    <p className="mt-4 max-w-3xl leading-8 text-white/90">
-                      {event.description}
-                    </p>
+                  {/* Info Pills */}
+                  <div className="relative mt-6 flex flex-wrap gap-3 text-sm">
+                    <div className="flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 backdrop-blur-sm">
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      {event.event_date}
+                    </div>
+                    <div className="flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 backdrop-blur-sm">
+                      ⏰ {event.event_time}
+                    </div>
+                    <div className="flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 backdrop-blur-sm">
+                      <MapPin className="h-3.5 w-3.5" />
+                      {event.venue}
+                    </div>
+                    <div className="flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 backdrop-blur-sm">
+                      <Users className="h-3.5 w-3.5" />
+                      {eventGuests.length} Guests
+                    </div>
                   </div>
                 </div>
 
-                {/* INFO */}
-                <div className="mt-6 flex flex-wrap gap-5 text-sm">
-
-                  <div className="flex items-center gap-2">
-                    <CalendarDays className="h-4 w-4" />
-                    {event.event_date}
+                {/* ── EDIT EVENT ── */}
+                <div className="border-b border-white/40 p-8">
+                  <div className="mb-6 flex items-center gap-3">
+                    <span className="h-1 w-8 rounded-full bg-[#f56483]" />
+                    <h3 className="text-xl font-black text-[#703c84]">Edit Event Details</h3>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    ⏰ {event.event_time}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <input
+                      type="text"
+                      defaultValue={event.event_name}
+                      placeholder="Event Name"
+                      onChange={(e) => {
+                        setEvents((prev) =>
+                          prev.map((ev) =>
+                            ev.id === event.id
+                              ? { ...ev, event_name: e.target.value }
+                              : ev
+                          )
+                        );
+                      }}
+                      className="rounded-full border-2 border-[#703c84]/20 bg-white/70 px-5 py-3 text-sm text-[#0b0705] outline-none placeholder:text-[#a090a8] focus:border-[#703c84] transition duration-200 backdrop-blur-md"
+                    />
+                    <input
+                      type="text"
+                      defaultValue={event.venue}
+                      placeholder="Venue"
+                      onChange={(e) => {
+                        setEvents((prev) =>
+                          prev.map((ev) =>
+                            ev.id === event.id
+                              ? { ...ev, venue: e.target.value }
+                              : ev
+                          )
+                        );
+                      }}
+                      className="rounded-full border-2 border-[#703c84]/20 bg-white/70 px-5 py-3 text-sm text-[#0b0705] outline-none placeholder:text-[#a090a8] focus:border-[#703c84] transition duration-200 backdrop-blur-md"
+                    />
+                    <input
+                      type="date"
+                      defaultValue={event.event_date}
+                      onChange={(e) => {
+                        setEvents((prev) =>
+                          prev.map((ev) =>
+                            ev.id === event.id
+                              ? { ...ev, event_date: e.target.value }
+                              : ev
+                          )
+                        );
+                      }}
+                      className="rounded-full border-2 border-[#703c84]/20 bg-white/70 px-5 py-3 text-sm text-[#0b0705] outline-none focus:border-[#703c84] transition duration-200 backdrop-blur-md"
+                    />
+                    <input
+                      type="time"
+                      defaultValue={event.event_time}
+                      onChange={(e) => {
+                        setEvents((prev) =>
+                          prev.map((ev) =>
+                            ev.id === event.id
+                              ? { ...ev, event_time: e.target.value }
+                              : ev
+                          )
+                        );
+                      }}
+                      className="rounded-full border-2 border-[#703c84]/20 bg-white/70 px-5 py-3 text-sm text-[#0b0705] outline-none focus:border-[#703c84] transition duration-200 backdrop-blur-md"
+                    />
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    {event.venue}
-                  </div>
+                  <textarea
+                    defaultValue={event.description}
+                    placeholder="Event Description"
+                    onChange={(e) => {
+                      setEvents((prev) =>
+                        prev.map((ev) =>
+                          ev.id === event.id
+                            ? { ...ev, description: e.target.value }
+                            : ev
+                        )
+                      );
+                    }}
+                    className="mt-4 min-h-[120px] w-full rounded-[20px] border-2 border-[#703c84]/20 bg-white/70 px-5 py-4 text-sm text-[#0b0705] outline-none placeholder:text-[#a090a8] focus:border-[#703c84] transition duration-200 backdrop-blur-md"
+                  />
 
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    {eventGuests.length} Guests
-                  </div>
+                  <button
+                    onClick={async () => {
+                      const { error } = await supabase
+                        .from("events")
+                        .update({
+                          event_name: event.event_name,
+                          description: event.description,
+                          event_date: event.event_date,
+                          event_time: event.event_time,
+                          venue: event.venue,
+                        })
+                        .eq("id", event.id);
+
+                      if (error) {
+                        alert(error.message);
+                        return;
+                      }
+
+                      alert("Event updated successfully");
+                    }}
+                    className="mt-5 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#703c84] to-[#f56483] px-8 py-3 text-sm font-semibold text-white shadow-[0_8px_25px_rgba(112,60,132,0.25)] transition duration-300 hover:scale-105"
+                  >
+                    Save Event Changes
+                  </button>
                 </div>
-              </div>
-              {/* EDIT EVENT */}
 
-              <div className="mt-8 rounded-[24px] border border-white/20 bg-white/10 p-5 backdrop-blur-md">
-
-                <h3 className="mb-5 text-xl font-bold text-white">
-                  Edit Event Details
-                </h3>
-
-                <div className="grid gap-4 md:grid-cols-2">
-
-                  <input
-                    type="text"
-                    defaultValue={event.event_name}
-                    placeholder="Event Name"
-                    onChange={(e) =>
-                      event.event_name = e.target.value
-                    }
-                    className="rounded-xl border border-white/20 bg-white/20 px-4 py-3 text-white outline-none placeholder:text-white/70"
-                  />
-
-                  <input
-                    type="text"
-                    defaultValue={event.venue}
-                    placeholder="Venue"
-                    onChange={(e) =>
-                      event.venue = e.target.value
-                    }
-                    className="rounded-xl border border-white/20 bg-white/20 px-4 py-3 text-white outline-none placeholder:text-white/70"
-                  />
-
-                  <input
-                    type="date"
-                    defaultValue={event.event_date}
-                    onChange={(e) =>
-                      event.event_date = e.target.value
-                    }
-                    className="rounded-xl border border-white/20 bg-white/20 px-4 py-3 text-white outline-none"
-                  />
-
-                  <input
-                    type="time"
-                    defaultValue={event.event_time}
-                    onChange={(e) =>
-                      event.event_time = e.target.value
-                    }
-                    className="rounded-xl border border-white/20 bg-white/20 px-4 py-3 text-white outline-none"
-                  />
-                </div>
-
-                <textarea
-                  defaultValue={event.description}
-                  placeholder="Event Description"
-                  onChange={(e) =>
-                    event.description = e.target.value
-                  }
-                  className="mt-4 min-h-[130px] w-full rounded-xl border border-white/20 bg-white/20 px-4 py-3 text-white outline-none placeholder:text-white/70"
-                />
-
-                <button
-                  onClick={async () => {
-                    const { error } = await supabase
-                      .from("events")
-                      .update({
-                        event_name: event.event_name,
-                        description: event.description,
-                        event_date: event.event_date,
-                        event_time: event.event_time,
-                        venue: event.venue,
-                      })
-                      .eq("id", event.id);
-
-                    if (error) {
-                      alert(error.message);
-                      return;
-                    }
-
-                    alert("Event updated successfully");
-                  }}
-                  className="mt-5 rounded-xl bg-white px-6 py-3 font-semibold text-[#6b3df0] transition hover:opacity-90"
-                >
-                  Save Event Changes
-                </button>
-              </div>
-              {/* GUESTS */}
-              <div className="p-5 md:p-7">
-
-                <h3 className="mb-6 text-2xl font-bold text-[#2b124c]">
-                  Guest Information
-                </h3>
-
-                {eventGuests.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-[#ddd2ff] bg-[#faf8ff] p-8 text-center text-[#7a6996]">
-                    No guests assigned yet.
+                {/* ── GUESTS ── */}
+                <div className="p-8">
+                  <div className="mb-6 flex items-center gap-3">
+                    <span className="h-1 w-8 rounded-full bg-[#703c84]" />
+                    <h3 className="text-xl font-black text-[#703c84]">Guest Information</h3>
                   </div>
-                ) : (
-                  <div className="grid gap-5">
 
-                    {eventGuests.map((guest) => (
-                      <div
-                        key={guest.id}
-                        className="rounded-[24px] border border-[#ece4ff] bg-[#fcfbff] p-5"
-                      >
+                  {eventGuests.length === 0 ? (
+                    <div className="rounded-[24px] border-2 border-dashed border-[#703c84]/20 bg-white/30 p-10 text-center text-[#703c84]">
+                      No guests assigned yet.
+                    </div>
+                  ) : (
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      {eventGuests.map((guest) => (
+                        <div
+                          key={guest.id}
+                          className="rounded-[24px] border border-white/50 bg-gradient-to-br from-[#fdcbca]/30 to-[#ebdbe6]/30 p-6 backdrop-blur-sm transition duration-300 hover:-translate-y-0.5"
+                        >
+                          {/* Guest Header */}
+                          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                            <h4 className="text-xl font-black text-[#0b0705]">
+                              {guest.guest_name}
+                            </h4>
+                            <span className="rounded-full bg-[#d0e7dd] px-3 py-1 text-xs font-bold text-[#406014]">
+                              {guest.status}
+                            </span>
+                          </div>
 
-                        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                          {/* Contact */}
+                          <div className="mb-5 space-y-2 text-sm text-[#3d3144]">
+                            {guest.guest_email && (
+                              <div className="flex items-center gap-2">
+                                <Mail className="h-3.5 w-3.5 text-[#703c84]" />
+                                {guest.guest_email}
+                              </div>
+                            )}
+                            {guest.guest_phone && (
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-3.5 w-3.5 text-[#703c84]" />
+                                {guest.guest_phone}
+                              </div>
+                            )}
+                          </div>
 
-                          {/* LEFT */}
-                          <div className="flex-1">
-
-                            <div className="flex flex-wrap items-center gap-3">
-
-                              <h4 className="text-2xl font-bold text-[#2b124c]">
-                                {guest.guest_name}
-                              </h4>
-
-                              <span className="rounded-full bg-[#dff8e8] px-3 py-1 text-xs font-semibold text-[#137a3c]">
-                                {guest.status}
-                              </span>
+                          {/* Details Grid */}
+                          <div className="mb-5 grid grid-cols-2 gap-2 rounded-[16px] bg-white/50 p-4 text-xs text-[#3d3144]">
+                            <div>
+                              <p className="mb-0.5 font-bold text-[#703c84]">Food</p>
+                              <p>{guest.guest_food_preferences || "N/A"}</p>
                             </div>
-
-                            {/* CONTACT */}
-                            <div className="mt-5 grid gap-3 text-sm text-[#5f4b7a]">
-
-                              {guest.guest_email && (
-                                <div className="flex items-center gap-2">
-                                  <Mail className="h-4 w-4" />
-                                  {guest.guest_email}
-                                </div>
-                              )}
-
-                              {guest.guest_phone && (
-                                <div className="flex items-center gap-2">
-                                  <Phone className="h-4 w-4" />
-                                  {guest.guest_phone}
-                                </div>
-                              )}
-
-                              <div className="flex items-center gap-2">
-                                <Utensils className="h-4 w-4" />
-                                Food:
-                                {" "}
-                                {guest.guest_food_preferences || "N/A"}
-                              </div>
-
-                              <div className="flex items-center gap-2">
-                                <BedDouble className="h-4 w-4" />
-                                Room:
-                                {" "}
-                                {guest.room_number || "N/A"}
-                              </div>
-
-                              <p>
-                                📍 Pickup:
-                                {" "}
-                                {guest.pickup_point || "N/A"}
-                              </p>
-
-                              <p>
-                                🚘 Drop:
-                                {" "}
-                                {guest.dropoff_point || "N/A"}
-                              </p>
-
-                              <p>
-                                📅 Arrival:
-                                {" "}
-                                {guest.arrival_date || "N/A"}
-                              </p>
-
-                              <p>
-                                📅 Departure:
-                                {" "}
-                                {guest.departure_date || "N/A"}
-                              </p>
-
-                              <p>
-                                ✨ Special Requests:
-                                {" "}
-                                {guest.special_requests || "None"}
-                              </p>
+                            <div>
+                              <p className="mb-0.5 font-bold text-[#703c84]">Room</p>
+                              <p>{guest.room_number || "N/A"}</p>
+                            </div>
+                            <div>
+                              <p className="mb-0.5 font-bold text-[#703c84]">Pickup</p>
+                              <p>{guest.pickup_point || "N/A"}</p>
+                            </div>
+                            <div>
+                              <p className="mb-0.5 font-bold text-[#703c84]">Drop</p>
+                              <p>{guest.dropoff_point || "N/A"}</p>
+                            </div>
+                            <div>
+                              <p className="mb-0.5 font-bold text-[#703c84]">Arrival</p>
+                              <p>{guest.arrival_date || "N/A"}</p>
+                            </div>
+                            <div>
+                              <p className="mb-0.5 font-bold text-[#703c84]">Departure</p>
+                              <p>{guest.departure_date || "N/A"}</p>
+                            </div>
+                            <div className="col-span-2">
+                              <p className="mb-0.5 font-bold text-[#703c84]">Special Requests</p>
+                              <p>{guest.special_requests || "None"}</p>
                             </div>
                           </div>
 
-                          {/* RIGHT */}
-                          <div className="flex flex-col gap-3">
-
+                          {/* Action Buttons */}
+                          <div className="flex flex-col gap-2">
                             {guest.guest_phone && (
                               <a
                                 href={`tel:${guest.guest_phone}`}
-                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#6b3df0] px-5 py-3 text-sm font-semibold text-white"
+                                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
                               >
                                 <Phone className="h-4 w-4" />
                                 Call Guest
                               </a>
                             )}
-
                             {guest.guest_email && (
                               <a
                                 href={`mailto:${guest.guest_email}`}
-                                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#ddd2ff] bg-white px-5 py-3 text-sm font-semibold text-[#2b124c]"
+                                className="inline-flex w-full items-center justify-center gap-2 rounded-full border-2 border-[#703c84] bg-white/60 px-5 py-2.5 text-sm font-semibold text-[#703c84] backdrop-blur-md transition duration-300 hover:scale-105 hover:bg-white/80"
                               >
                                 <Mail className="h-4 w-4" />
                                 Email Guest
@@ -422,15 +496,31 @@ setGuests(guestData || []);
                             )}
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
+
+      {/* FOOTER */}
+      <footer className="relative z-10 mt-10 border-t border-white/40 bg-white/20 py-6 text-center backdrop-blur-xl">
+        <p className="text-sm tracking-wide text-[#3d3144]">
+          IIT Madras BS Presents • PARADOX '26 • Core Team Panel
+        </p>
+      </footer>
+
+      {/* KEYFRAMES */}
+      <style jsx global>{`
+        @keyframes gradientShift {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+      `}</style>
     </main>
   );
 }
