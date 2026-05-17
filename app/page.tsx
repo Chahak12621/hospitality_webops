@@ -283,7 +283,7 @@ export default function LandingPage() {
               className="group rounded-[28px] bg-gradient-to-br from-[#ebdbe6] to-[#fcc4b7] p-8 transition duration-300 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.12)]"
             >
               <p className="text-xs uppercase tracking-[0.35em] text-[#703c84]">Document 01</p>
-              <h3 className="mt-4 text-2xl font-black text-[#703c84]">workflow automation</h3>
+              <h3 className="mt-4 text-2xl font-black text-[#703c84]">workflow document</h3>
               <p className="mt-4 leading-7 text-[#3d3144]">
                 Rules, accommodation process, reporting structure and important instructions for
                 volunteers and coordinators.
@@ -300,7 +300,7 @@ export default function LandingPage() {
               className="group rounded-[28px] bg-gradient-to-br from-[#d0e7dd] to-[#ffe8b5] p-8 transition duration-300 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.12)]"
             >
               <p className="text-xs uppercase tracking-[0.35em] text-[#703c84]">Document 02</p>
-              <h3 className="mt-4 text-2xl font-black text-[#703c84]">Schedule operation Procedure</h3>
+              <h3 className="mt-4 text-2xl font-black text-[#703c84]">Standard operating Procedure</h3>
               <p className="mt-4 leading-7 text-[#3d3144]">
                 Complete timeline of guest arrivals, registrations, accommodation allocation and
                 major event activities.

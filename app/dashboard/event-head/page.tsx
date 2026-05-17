@@ -709,14 +709,8 @@ export default function EventHeadDashboard() {
                     className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none bg-white"
                   >
                     <option value="">Food Preferences</option>
-                    <option value="Veg">Veg</option>
-                    <option value="Non-Veg">Non-Veg</option>
-                    <option value="Veg - North Indian">Veg - North Indian</option>
-                    <option value="Veg - South Indian">Veg - South Indian</option>
-                    <option value="Non-Veg - North Indian">Non-Veg - North Indian</option>
-                    <option value="Non-Veg - South Indian">Non-Veg - South Indian</option>
-                    <option value="Jain">Jain</option>
-                    <option value="Vegan">Vegan</option>
+                    <option value="Veg">Not required</option>
+                    <option value="Non-Veg">Veg</option>
                   </select>
                   <input
                     placeholder="Room Number"
@@ -847,13 +841,10 @@ export default function EventHeadDashboard() {
                         >
                           <option value="">Food Preferences</option>
                           <option value="Veg">Veg</option>
-                          <option value="Non-Veg">Non-Veg</option>
-                          <option value="Veg - North Indian">Veg - North Indian</option>
-                          <option value="Veg - South Indian">Veg - South Indian</option>
-                          <option value="Non-Veg - North Indian">Non-Veg - North Indian</option>
-                          <option value="Non-Veg - South Indian">Non-Veg - South Indian</option>
-                          <option value="Jain">Jain</option>
-                          <option value="Vegan">Vegan</option>
+                          <option value="Non-Veg">Not required</option>
+                          
+                          
+                          
                         </select>
                         <input
                           value={guest.room_number}
