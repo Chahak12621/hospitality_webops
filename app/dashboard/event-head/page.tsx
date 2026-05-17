@@ -53,6 +53,7 @@ export default function EventHeadDashboard() {
     event_date: "",
     event_time: "",
     venue: "",
+    contact_number: "",
   });
 
   // CREATE GUEST FORM
@@ -168,13 +169,14 @@ export default function EventHeadDashboard() {
     }
 
     // LINK EVENT TO EVENT HEAD
+    
     const { error: updateError } = await supabase
       .from("event_heads")
       .update({
         assigned_event_id: data.id,
+        contact_number: newEvent.contact_number,
       })
       .eq("email", email);
-
     if (updateError) {
       alert(updateError.message);
       return;
@@ -189,6 +191,7 @@ export default function EventHeadDashboard() {
       event_date: "",
       event_time: "",
       venue: "",
+      contact_number: "",
     });
 
     fetchMyEvents();
@@ -459,6 +462,13 @@ export default function EventHeadDashboard() {
                 ...newEvent,
                 venue: e.target.value,
               })
+            }
+            className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+          />
+          <input
+            placeholder="Your Contact Number"
+            onChange={(e) =>
+              setNewEvent({ ...newEvent, contact_number: e.target.value })
             }
             className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
           />
