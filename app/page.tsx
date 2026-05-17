@@ -151,12 +151,7 @@ export default function LandingPage() {
               <ArrowRight className="h-4 w-4" />
             </button>
 
-            <button
-              onClick={() => router.push("/dashboard/team")}
-              className="rounded-full border-2 border-[#703c84] bg-white/40 px-8 py-4 text-sm font-semibold text-[#703c84] backdrop-blur-md transition duration-300 hover:scale-105 hover:bg-white/70"
-            >
-              Explore Team
-            </button>
+            
           </motion.div>
 
           {/* Email Sign-In prompt — shown when Login / Enter Portal is clicked */}
@@ -267,52 +262,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ABOUT THEME */}
-      <section className="relative z-10 mx-auto max-w-7xl px-6 pb-24">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="mb-10 text-center"
-        >
-          <p className="text-xs uppercase tracking-[0.4em] text-[#703c84]">The Theme</p>
-          <h2 className="mt-4 text-4xl font-black text-[#703c84]">Symphony in Shades</h2>
-        </motion.div>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          {[
-            {
-              title: "Monochrome World",
-              desc: "A world shaped by labels, stereotypes and routine thinking.",
-              color: "from-[#fdcbca] to-[#fcc4b7]",
-            },
-            {
-              title: "Hidden Spectrum",
-              desc: "Within every individual lies emotion, curiosity and untold stories.",
-              color: "from-[#ebdbe6] to-[#d8d0e8]",
-            },
-            {
-              title: "Quest for Colour",
-              desc: "Paradox celebrates the courage to ask why and look deeper.",
-              color: "from-[#d0e7dd] to-[#ffe8b5]",
-            },
-          ].map((item, index) => (
-            <motion.div
-              key={item.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              viewport={{ once: true }}
-              className={`rounded-[32px] border border-white/40 bg-gradient-to-br ${item.color} p-8 shadow-[0_20px_50px_rgba(0,0,0,0.08)] backdrop-blur-md transition duration-300 hover:-translate-y-1`}
-            >
-              <h3 className="text-3xl font-bold text-[#703c84]">{item.title}</h3>
-              <p className="mt-5 leading-8 text-[#3d3144]">{item.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
+      
       {/* IMPORTANT DOCUMENTS */}
       <section className="relative z-10 mx-auto max-w-7xl px-6 pb-16">
         <div className="rounded-[36px] border border-white/40 bg-white/25 p-10 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
@@ -333,7 +283,7 @@ export default function LandingPage() {
               className="group rounded-[28px] bg-gradient-to-br from-[#ebdbe6] to-[#fcc4b7] p-8 transition duration-300 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.12)]"
             >
               <p className="text-xs uppercase tracking-[0.35em] text-[#703c84]">Document 01</p>
-              <h3 className="mt-4 text-2xl font-black text-[#703c84]">Hospitality Guidelines</h3>
+              <h3 className="mt-4 text-2xl font-black text-[#703c84]">workflow automation</h3>
               <p className="mt-4 leading-7 text-[#3d3144]">
                 Rules, accommodation process, reporting structure and important instructions for
                 volunteers and coordinators.
@@ -350,7 +300,7 @@ export default function LandingPage() {
               className="group rounded-[28px] bg-gradient-to-br from-[#d0e7dd] to-[#ffe8b5] p-8 transition duration-300 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.12)]"
             >
               <p className="text-xs uppercase tracking-[0.35em] text-[#703c84]">Document 02</p>
-              <h3 className="mt-4 text-2xl font-black text-[#703c84]">Event Schedule</h3>
+              <h3 className="mt-4 text-2xl font-black text-[#703c84]">Schedule operation Procedure</h3>
               <p className="mt-4 leading-7 text-[#3d3144]">
                 Complete timeline of guest arrivals, registrations, accommodation allocation and
                 major event activities.
@@ -406,7 +356,7 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer className="relative z-10 border-t border-white/40 bg-white/20 py-8 text-center backdrop-blur-xl">
         <p className="text-sm tracking-wide text-[#3d3144]">
-          IIT Madras BS Presents • PARADOX '26 • Symphony in Shades
+          IIT Madras BS Presents • PARADOX '26 
         </p>
       </footer>
 

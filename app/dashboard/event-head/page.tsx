@@ -29,7 +29,15 @@ type GuestType = {
   departure_date: string;
   status: string;
 };
-
+type CoreTeamType = {
+  id: string;
+  name: string;
+  email: string;
+  contact_number: string;
+  role: string;
+  department: string;
+  assigned_event_id: string;
+};
 export default function EventHeadDashboard() {
 
   const [events, setEvents] = useState<EventType[]>([]);
@@ -266,6 +274,13 @@ export default function EventHeadDashboard() {
     alert("Guest added");
 
     fetchMyEvents();
+    // at end of createGuest(), after fetchMyEvents():
+    setNewGuest({
+      guest_name: "", guest_email: "", guest_phone: "",
+      guest_food_preferences: "", special_requests: "",
+      room_number: "", pickup_point: "", dropoff_point: "",
+      arrival_date: "", departure_date: "", status: "pending",
+    });
   };
 
   // ─────────────────────────────────────────────
@@ -411,7 +426,7 @@ export default function EventHeadDashboard() {
             </option>
 
             <option value="open">
-              Open
+              Central
             </option>
           </select>
 
@@ -480,6 +495,7 @@ export default function EventHeadDashboard() {
           const eventGuests = guests.filter(
             (guest) => guest.event_id === event.id
           );
+
 
           return (
             <div
@@ -678,17 +694,61 @@ export default function EventHeadDashboard() {
                     className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                   />
 
+                  <select
+                    onChange={(e) => setNewGuest({ ...newGuest, guest_food_preferences: e.target.value })}
+                    className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none bg-white"
+                  >
+                    <option value="">Food Preferences</option>
+                    <option value="Veg">Veg</option>
+                    <option value="Non-Veg">Non-Veg</option>
+                    <option value="Veg - North Indian">Veg - North Indian</option>
+                    <option value="Veg - South Indian">Veg - South Indian</option>
+                    <option value="Non-Veg - North Indian">Non-Veg - North Indian</option>
+                    <option value="Non-Veg - South Indian">Non-Veg - South Indian</option>
+                    <option value="Jain">Jain</option>
+                    <option value="Vegan">Vegan</option>
+                  </select>
                   <input
-                    placeholder="Food Preferences"
-                    onChange={(e) =>
-                      setNewGuest({
-                        ...newGuest,
-                        guest_food_preferences:
-                          e.target.value,
-                      })
-                    }
+                    placeholder="Room Number"
+                    onChange={(e) => setNewGuest({ ...newGuest, room_number: e.target.value })}
                     className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                   />
+                  <input
+                    placeholder="Pickup Point"
+                    onChange={(e) => setNewGuest({ ...newGuest, pickup_point: e.target.value })}
+                    className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                  />
+                  <input
+                    placeholder="Dropoff Point"
+                    onChange={(e) => setNewGuest({ ...newGuest, dropoff_point: e.target.value })}
+                    className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                  />
+                  <input
+                    type="date"
+                    placeholder="Arrival Date"
+                    onChange={(e) => setNewGuest({ ...newGuest, arrival_date: e.target.value })}
+                    className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                  />
+                  <input
+                    type="date"
+                    placeholder="Departure Date"
+                    onChange={(e) => setNewGuest({ ...newGuest, departure_date: e.target.value })}
+                    className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                  />
+                  <textarea
+                    placeholder="Special Requests"
+                    onChange={(e) => setNewGuest({ ...newGuest, special_requests: e.target.value })}
+                    className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none md:col-span-2"
+                  />
+                  <select
+                    onChange={(e) => setNewGuest({ ...newGuest, status: e.target.value })}
+                    className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="checked_in">Checked In</option>
+                    <option value="checked_out">Checked Out</option>
+                  </select>
 
                 </div>
 
@@ -770,24 +830,67 @@ export default function EventHeadDashboard() {
                           className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                         />
 
+                        <select
+                          value={guest.guest_food_preferences}
+                          onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, guest_food_preferences: e.target.value } : item))}
+                          className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none bg-white"
+                        >
+                          <option value="">Food Preferences</option>
+                          <option value="Veg">Veg</option>
+                          <option value="Non-Veg">Non-Veg</option>
+                          <option value="Veg - North Indian">Veg - North Indian</option>
+                          <option value="Veg - South Indian">Veg - South Indian</option>
+                          <option value="Non-Veg - North Indian">Non-Veg - North Indian</option>
+                          <option value="Non-Veg - South Indian">Non-Veg - South Indian</option>
+                          <option value="Jain">Jain</option>
+                          <option value="Vegan">Vegan</option>
+                        </select>
                         <input
-                          value={
-                            guest.guest_food_preferences
-                          }
-                          onChange={(e) =>
-                            setGuests((prev) =>
-                              prev.map((item) =>
-                                item.id === guest.id
-                                  ? {
-                                    ...item,
-                                    guest_food_preferences: e.target.value,
-                                  }
-                                  : item
-                              )
-                            )
-                          }
+                          value={guest.room_number}
+                          onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, room_number: e.target.value } : item))}
+                          placeholder="Room Number"
                           className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                         />
+                        <input
+                          value={guest.pickup_point}
+                          onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, pickup_point: e.target.value } : item))}
+                          placeholder="Pickup Point"
+                          className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                        />
+                        <input
+                          value={guest.dropoff_point}
+                          onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, dropoff_point: e.target.value } : item))}
+                          placeholder="Dropoff Point"
+                          className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                        />
+                        <input
+                          type="date"
+                          value={guest.arrival_date}
+                          onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, arrival_date: e.target.value } : item))}
+                          className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                        />
+                        <input
+                          type="date"
+                          value={guest.departure_date}
+                          onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, departure_date: e.target.value } : item))}
+                          className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                        />
+                        <textarea
+                          value={guest.special_requests}
+                          onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, special_requests: e.target.value } : item))}
+                          placeholder="Special Requests"
+                          className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none md:col-span-2"
+                        />
+                        <select
+                          value={guest.status}
+                          onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, status: e.target.value } : item))}
+                          className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="confirmed">Confirmed</option>
+                          <option value="checked_in">Checked In</option>
+                          <option value="checked_out">Checked Out</option>
+                        </select>
 
                       </div>
 

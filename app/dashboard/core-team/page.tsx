@@ -39,11 +39,19 @@ type GuestType = {
   departure_date: string;
   status: string;
 };
+type EventHeadType = {
+  id: string;
+  name: string;
+  email: string;
+  contact_number: string;
+  assigned_event_id?: string | null;
+};
 
 export default function CoreTeamDashboard() {
   const [events, setEvents] = useState<EventType[]>([]);
   const [guests, setGuests] = useState<GuestType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [eventHeads, setEventHeads] = useState<EventHeadType[]>([]);
 
   // ─────────────────────────────────────────────
   // FETCH ASSIGNED EVENTS
@@ -89,6 +97,12 @@ export default function CoreTeamDashboard() {
       }
 
       setEvents([eventData]);
+      const { data: eventHeadData } = await supabase
+        .from("event_heads")
+        .select("*")
+        .eq("assigned_event_id", eventData.id);
+
+      setEventHeads(eventHeadData || []);
 
       // FETCH GUESTS OF THAT EVENT
       const { data: guestData, error: guestError } = await supabase
@@ -245,6 +259,7 @@ export default function CoreTeamDashboard() {
             const eventGuests = guests.filter(
               (guest: any) => guest.event_id === event.id
             );
+            const eventHead = eventHeads.find((h) => h.assigned_event_id === event.id);
 
             return (
               <div
@@ -288,6 +303,23 @@ export default function CoreTeamDashboard() {
                     </div>
                   </div>
                 </div>
+                {/* Event Head */}
+                {eventHead && (
+                  <div className="mt-5 rounded-2xl border border-[#703c84]/20 bg-[#ebdbe6]/30 p-4">
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-[#703c84]">Event Head</p>
+                    <div className="flex flex-wrap items-center gap-4">
+                      <p className="font-bold text-[#0b0705]">{eventHead.name}</p>
+                      <a href={`mailto:${eventHead.email}`} className="flex items-center gap-1.5 text-xs text-[#703c84]">
+                        <Mail className="h-3.5 w-3.5" /> {eventHead.email}
+                      </a>
+                      {eventHead.contact_number && (
+                        <a href={`tel:${eventHead.contact_number}`} className="flex items-center gap-1.5 text-xs font-semibold text-[#f56483]">
+                          <Phone className="h-3.5 w-3.5" /> {eventHead.contact_number}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* ── EDIT EVENT ── */}
                 <div className="border-b border-white/40 p-8">
