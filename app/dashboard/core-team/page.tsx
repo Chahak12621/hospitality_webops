@@ -176,7 +176,7 @@ export default function CoreTeamDashboard() {
           </div>
 
           {/* Right — Inventory + Logout */}
-          
+          <div className="flex items-center gap-4">
 
             <button
               onClick={async () => {
