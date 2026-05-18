@@ -12,10 +12,50 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
+  const [requiresPassword, setRequiresPassword] = useState(false);
 
   // ─────────────────────────────────────────────
   // LOGIN
   // ─────────────────────────────────────────────
+  const checkIfPasswordRequired = async (
+    value: string
+  ) => {
+
+    const trimmed =
+      value.trim().toLowerCase();
+
+    if (!trimmed) {
+      setRequiresPassword(false);
+      return;
+    }
+
+    // CHECK PARADOX
+    const { data: paradox } = await supabase
+      .from("paradox")
+      .select("id")
+      .eq("mail", trimmed)
+      .maybeSingle();
+
+    if (paradox) {
+      setRequiresPassword(true);
+      return;
+    }
+
+    // CHECK ADMIN
+    const { data: admin } = await supabase
+      .from("admins")
+      .select("id")
+      .eq("email", trimmed)
+      .maybeSingle();
+
+    if (admin) {
+      setRequiresPassword(true);
+      return;
+    }
+
+    setRequiresPassword(false);
+  };
+
   const handleLogin = async () => {
     const trimmedEmail = email.trim().toLowerCase();
 
@@ -242,9 +282,14 @@ export default function LoginPage() {
             <input
               type="email"
               value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
+              onChange={async (e) => {
+
+                const value = e.target.value;
+
+                setEmail(value);
+
+                await checkIfPasswordRequired(value);
+              }}
               onKeyDown={handleKeyDown}
               placeholder="Enter your email"
               autoComplete="off"

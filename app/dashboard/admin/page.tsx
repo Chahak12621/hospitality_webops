@@ -202,23 +202,7 @@ export default function AdminDashboard() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <div className="h-11 w-11 flex-shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" className="h-full w-full">
-                <defs>
-                  <radialGradient id="adLogoGrad" cx="45%" cy="40%" r="60%">
-                    <stop offset="0%" stopColor="#f56483" />
-                    <stop offset="60%" stopColor="#703c84" />
-                    <stop offset="100%" stopColor="#4a1a6b" />
-                  </radialGradient>
-                  <radialGradient id="adRingGrad" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#8b3fa8" />
-                    <stop offset="100%" stopColor="#4a1060" />
-                  </radialGradient>
-                </defs>
-                <circle cx="100" cy="100" r="98" fill="url(#adRingGrad)" />
-                <circle cx="100" cy="100" r="90" fill="url(#adLogoGrad)" />
-                <text x="100" y="88" textAnchor="middle" fontSize="9" fontWeight="600" fill="white" letterSpacing="2">IIT MADRAS</text>
-                <text x="100" y="108" textAnchor="middle" fontSize="20" fontWeight="900" fill="white" letterSpacing="1">PARADOX</text>
-              </svg>
+               <img src="logo1.png" alt="paradox-logo" />
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.4em] text-[#703c84]">Paradox '26 · Hospitality</p>

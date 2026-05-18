@@ -26,6 +26,8 @@ type GuestType = {
   dropoff_point: string;
   arrival_date: string;
   departure_date: string;
+  arrival_time: string;
+  departure_time: string;
 };
 type CoreTeamType = {
   id: string;
@@ -42,7 +44,7 @@ export default function EventHeadDashboard() {
   const [guests, setGuests] = useState<GuestType[]>([]);
   const [loading, setLoading] = useState(true);
   const [coreTeam, setCoreTeam] = useState<any[]>([]);
-  
+
 
 
   // CREATE EVENT FORM
@@ -67,6 +69,8 @@ export default function EventHeadDashboard() {
     dropoff_point: "",
     arrival_date: "",
     departure_date: "",
+    arrival_time: "",
+    departure_time: "",
   });
 
   useEffect(() => {
@@ -267,8 +271,9 @@ export default function EventHeadDashboard() {
     setNewGuest({
       guest_name: "", guest_email: "", guest_phone: "",
       guest_food_preferences: "", special_requests: "",
-       pickup_point: "", dropoff_point: "",
-      arrival_date: "", departure_date: "", 
+      pickup_point: "", dropoff_point: "",
+      arrival_date: "", departure_date: "",
+      arrival_time: "", departure_time: "",
     });
   };
 
@@ -289,12 +294,13 @@ export default function EventHeadDashboard() {
           guest.guest_food_preferences,
         special_requests:
           guest.special_requests,
-        
+
         pickup_point: guest.pickup_point,
         dropoff_point: guest.dropoff_point,
         arrival_date: guest.arrival_date,
         departure_date: guest.departure_date,
-  
+        arrival_time: guest.arrival_time,
+        departure_time: guest.departure_time,
       })
       .eq("id", guest.id);
 
@@ -696,7 +702,7 @@ export default function EventHeadDashboard() {
                     <option value="Veg">Not required</option>
                     <option value="Non-Veg">Veg</option>
                   </select>
-                  
+
                   <input
                     placeholder="Pickup Point"
                     onChange={(e) => setNewGuest({ ...newGuest, pickup_point: e.target.value })}
@@ -707,24 +713,79 @@ export default function EventHeadDashboard() {
                     onChange={(e) => setNewGuest({ ...newGuest, dropoff_point: e.target.value })}
                     className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                   />
-                  <input
-                    type="date"
-                    placeholder="Arrival Date"
-                    onChange={(e) => setNewGuest({ ...newGuest, arrival_date: e.target.value })}
-                    className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
-                  />
-                  <input
-                    type="date"
-                    placeholder="Departure Date"
-                    onChange={(e) => setNewGuest({ ...newGuest, departure_date: e.target.value })}
-                    className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
-                  />
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[#2b124c]">
+                      Arrival Date
+                    </label>
+
+                    <input
+                      type="date"
+                      onChange={(e) =>
+                        setNewGuest({
+                          ...newGuest,
+                          arrival_date: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[#2b124c]">
+                      Arrival Time
+                    </label>
+
+                    <input
+                      type="time"
+                      onChange={(e) =>
+                        setNewGuest({
+                          ...newGuest,
+                          arrival_time: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[#2b124c]">
+                      Departure Date
+                    </label>
+
+                    <input
+                      type="date"
+                      onChange={(e) =>
+                        setNewGuest({
+                          ...newGuest,
+                          departure_date: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[#2b124c]">
+                      Departure Time
+                    </label>
+
+                    <input
+                      type="time"
+                      onChange={(e) =>
+                        setNewGuest({
+                          ...newGuest,
+                          departure_time: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                    />
+                  </div>
                   <textarea
                     placeholder="Special Requests"
                     onChange={(e) => setNewGuest({ ...newGuest, special_requests: e.target.value })}
                     className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none md:col-span-2"
                   />
-                  
+
 
                 </div>
 
@@ -818,7 +879,7 @@ export default function EventHeadDashboard() {
 
 
                         </select>
-                        
+
                         <input
                           value={guest.pickup_point}
                           onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, pickup_point: e.target.value } : item))}
@@ -831,25 +892,80 @@ export default function EventHeadDashboard() {
                           placeholder="Dropoff Point"
                           className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                         />
-                        <input
-                          type="date"
-                          value={guest.arrival_date}
-                          onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, arrival_date: e.target.value } : item))}
-                          className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
-                        />
-                        <input
-                          type="date"
-                          value={guest.departure_date}
-                          onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, departure_date: e.target.value } : item))}
-                          className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
-                        />
+                        <div>
+                          <label className="mb-2 block text-sm font-semibold text-[#2b124c]">
+                            Arrival Date
+                          </label>
+
+                          <input
+                            type="date"
+                            onChange={(e) =>
+                              setNewGuest({
+                                ...newGuest,
+                                arrival_date: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="mb-2 block text-sm font-semibold text-[#2b124c]">
+                            Arrival Time
+                          </label>
+
+                          <input
+                            type="time"
+                            onChange={(e) =>
+                              setNewGuest({
+                                ...newGuest,
+                                arrival_time: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="mb-2 block text-sm font-semibold text-[#2b124c]">
+                            Departure Date
+                          </label>
+
+                          <input
+                            type="date"
+                            onChange={(e) =>
+                              setNewGuest({
+                                ...newGuest,
+                                departure_date: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="mb-2 block text-sm font-semibold text-[#2b124c]">
+                            Departure Time
+                          </label>
+
+                          <input
+                            type="time"
+                            onChange={(e) =>
+                              setNewGuest({
+                                ...newGuest,
+                                departure_time: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+                          />
+                        </div>
                         <textarea
                           value={guest.special_requests}
                           onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, special_requests: e.target.value } : item))}
                           placeholder="Special Requests"
                           className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none md:col-span-2"
                         />
-                        
+
 
                       </div>
 
