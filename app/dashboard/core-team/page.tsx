@@ -176,13 +176,7 @@ export default function CoreTeamDashboard() {
           </div>
 
           {/* Right — Inventory + Logout */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard/inventory"
-              className="rounded-full border-2 border-[#703c84] bg-white/40 px-5 py-2.5 text-sm font-semibold text-[#703c84] backdrop-blur-md transition duration-300 hover:scale-105 hover:bg-white/70"
-            >
-              Inventory
-            </Link>
+          
 
             <button
               onClick={async () => {
