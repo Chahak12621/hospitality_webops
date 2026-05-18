@@ -61,6 +61,20 @@ export async function getCurrentUser() {
         user_type: "event_head",
       };
     }
+    // check paradox team //
+
+    const { data: paradoxMember } = await supabase
+      .from("paradox")
+      .select("*")
+      .eq("email", user.email)
+      .single();
+
+    if (paradoxMember) {
+      return {
+        ...paradoxMember,
+        user_type: "paradox_team",
+      };
+    }
 
     // CHECK CORE TEAM
     const { data: coreMember } = await supabase
@@ -149,6 +163,20 @@ export async function checkIfAuthorized(email: string) {
         user_type: "core_team",
       };
     }
+    
+    // CHECK PARADOX TEAM
+    const { data: paradoxMember } = await supabase
+      .from("paradox")
+      .select("*")
+      .eq("email", email)
+      .single();
+
+    if (paradoxMember) {
+      return {
+        ...paradoxMember,
+        user_type: "paradox_team",
+      };
+    }
 
     return null;
   } catch (error) {
@@ -215,6 +243,26 @@ export async function getAllAdmins() {
   try {
     const { data, error } = await supabase
       .from("admins")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(error.message);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+// GET ALL PARADOX TEAM MEMBERS //
+export async function getAllParadoxTeamMembers() {
+  try {
+    const { data, error } = await supabase
+      .from("paradox")
       .select("*")
       .order("created_at", { ascending: false });
 

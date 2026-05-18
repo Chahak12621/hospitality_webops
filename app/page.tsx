@@ -28,36 +28,8 @@ export default function LandingPage() {
         <div className="flex items-center gap-4">
           {/* SVG LOGO — exact from design.md */}
           <div className="h-16 w-16">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" className="h-full w-full">
-              <defs>
-                <radialGradient id="logoGrad" cx="45%" cy="40%" r="60%">
-                  <stop offset="0%" stopColor="#f56483" />
-                  <stop offset="60%" stopColor="#703c84" />
-                  <stop offset="100%" stopColor="#4a1a6b" />
-                </radialGradient>
-                <radialGradient id="ringGrad" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#8b3fa8" />
-                  <stop offset="100%" stopColor="#4a1060" />
-                </radialGradient>
-              </defs>
-              <circle cx="100" cy="100" r="98" fill="url(#ringGrad)" />
-              <circle cx="100" cy="100" r="90" fill="url(#logoGrad)" />
-              {[
-                [100, 60, 2], [120, 65, 2], [135, 78, 2.5], [140, 95, 2.5],
-                [135, 112, 2.5], [125, 126, 3], [112, 136, 3], [95, 140, 3.5],
-                [78, 136, 3.5], [64, 126, 4], [58, 112, 4], [58, 95, 4],
-                [64, 78, 4.5], [78, 66, 4.5],
-              ].map(([cx, cy, r], i) => (
-                <circle key={i} cx={cx} cy={cy} r={r} fill="rgba(255,255,255,0.9)" />
-              ))}
-              <circle cx="100" cy="100" r="5" fill="rgba(255,255,255,0.6)" />
-              <text x="100" y="88" textAnchor="middle" fontSize="9" fontWeight="600" fill="white" letterSpacing="2">
-                IIT MADRAS
-              </text>
-              <text x="100" y="108" textAnchor="middle" fontSize="20" fontWeight="900" fill="white" letterSpacing="1">
-                PARADOX
-              </text>
-            </svg>
+            <img src="logo1.png" alt="paradox-logo" />
+
           </div>
 
           <div>
@@ -151,7 +123,7 @@ export default function LandingPage() {
               <ArrowRight className="h-4 w-4" />
             </button>
 
-            
+
           </motion.div>
 
           {/* Email Sign-In prompt — shown when Login / Enter Portal is clicked */}
@@ -262,7 +234,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      
+
       {/* IMPORTANT DOCUMENTS */}
       <section className="relative z-10 mx-auto max-w-7xl px-6 pb-16">
         <div className="rounded-[36px] border border-white/40 bg-white/25 p-10 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
@@ -356,7 +328,7 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer className="relative z-10 border-t border-white/40 bg-white/20 py-8 text-center backdrop-blur-xl">
         <p className="text-sm tracking-wide text-[#3d3144]">
-          IIT Madras BS Presents • PARADOX '26 
+          IIT Madras BS Presents • PARADOX '26
         </p>
       </footer>
 

@@ -22,12 +22,10 @@ type GuestType = {
   guest_phone: string;
   guest_food_preferences: string;
   special_requests: string;
-  room_number: string;
   pickup_point: string;
   dropoff_point: string;
   arrival_date: string;
   departure_date: string;
-  status: string;
 };
 type CoreTeamType = {
   id: string;
@@ -44,6 +42,8 @@ export default function EventHeadDashboard() {
   const [guests, setGuests] = useState<GuestType[]>([]);
   const [loading, setLoading] = useState(true);
   const [coreTeam, setCoreTeam] = useState<any[]>([]);
+  
+
 
   // CREATE EVENT FORM
   const [newEvent, setNewEvent] = useState({
@@ -53,8 +53,8 @@ export default function EventHeadDashboard() {
     event_date: "",
     event_time: "",
     venue: "",
-    contact_number: "",
   });
+  const [newEventContact, setNewEventContact] = useState("");
 
   // CREATE GUEST FORM
   const [newGuest, setNewGuest] = useState({
@@ -63,12 +63,10 @@ export default function EventHeadDashboard() {
     guest_phone: "",
     guest_food_preferences: "",
     special_requests: "",
-    room_number: "",
     pickup_point: "",
     dropoff_point: "",
     arrival_date: "",
     departure_date: "",
-    status: "pending",
   });
 
   useEffect(() => {
@@ -85,6 +83,7 @@ export default function EventHeadDashboard() {
   // ─────────────────────────────────────────────
   // FETCH ONLY MY EVENTS
   // ─────────────────────────────────────────────
+
   const fetchMyEvents = async () => {
     try {
       const email = sessionStorage.getItem("portal_email");
@@ -100,6 +99,8 @@ export default function EventHeadDashboard() {
         .select("assigned_event_id")
         .eq("email", email);
 
+
+
       if (headError) {
         console.log(headError);
         setLoading(false);
@@ -114,6 +115,7 @@ export default function EventHeadDashboard() {
       const eventIds = head
         .map((item: any) => item.assigned_event_id)
         .filter(Boolean);
+
 
       // 2. FETCH EVENTS
       const { data: eventData } = await supabase
@@ -148,52 +150,33 @@ export default function EventHeadDashboard() {
   // CREATE EVENT
   // ─────────────────────────────────────────────
   const createEvent = async () => {
-    const email = sessionStorage.getItem(
-      "portal_email"
-    );
+    const email = sessionStorage.getItem("portal_email");
+    if (!email) { alert("Unauthorized"); return; }
 
-    if (!email) {
-      alert("Unauthorized");
-      return;
-    }
-
+    // Insert event WITHOUT contact_number
+    const { event_name, department, description, event_date, event_time, venue } = newEvent;
     const { data, error } = await supabase
       .from("events")
-      .insert([newEvent])
+      .insert([{ event_name, department, description, event_date, event_time, venue }])
       .select()
       .single();
 
-    if (error) {
-      alert(error.message);
-      return;
-    }
+    if (error) { alert(error.message); return; }
 
-    // LINK EVENT TO EVENT HEAD
-    
+    // Update event_heads with assigned_event_id AND contact_number
     const { error: updateError } = await supabase
       .from("event_heads")
       .update({
         assigned_event_id: data.id,
-        contact_number: newEvent.contact_number,
+        contact_number: newEventContact,
       })
       .eq("email", email);
-    if (updateError) {
-      alert(updateError.message);
-      return;
-    }
+
+    if (updateError) { alert(updateError.message); return; }
 
     alert("Event created");
-
-    setNewEvent({
-      event_name: "",
-      department: "technical",
-      description: "",
-      event_date: "",
-      event_time: "",
-      venue: "",
-      contact_number: "",
-    });
-
+    setNewEvent({ event_name: "", department: "technical", description: "", event_date: "", event_time: "", venue: "" });
+    setNewEventContact("");
     fetchMyEvents();
   };
 
@@ -249,6 +232,9 @@ export default function EventHeadDashboard() {
     }
 
     alert("Event deleted");
+    setNewEvent({ event_name: "", department: "technical", description: "", event_date: "", event_time: "", venue: "" });
+    setNewEventContact("");
+
 
     fetchMyEvents();
   };
@@ -281,8 +267,8 @@ export default function EventHeadDashboard() {
     setNewGuest({
       guest_name: "", guest_email: "", guest_phone: "",
       guest_food_preferences: "", special_requests: "",
-      room_number: "", pickup_point: "", dropoff_point: "",
-      arrival_date: "", departure_date: "", status: "pending",
+       pickup_point: "", dropoff_point: "",
+      arrival_date: "", departure_date: "", 
     });
   };
 
@@ -303,12 +289,12 @@ export default function EventHeadDashboard() {
           guest.guest_food_preferences,
         special_requests:
           guest.special_requests,
-        room_number: guest.room_number,
+        
         pickup_point: guest.pickup_point,
         dropoff_point: guest.dropoff_point,
         arrival_date: guest.arrival_date,
         departure_date: guest.departure_date,
-        status: guest.status,
+  
       })
       .eq("id", guest.id);
 
@@ -467,9 +453,7 @@ export default function EventHeadDashboard() {
           />
           <input
             placeholder="Your Contact Number"
-            onChange={(e) =>
-              setNewEvent({ ...newEvent, contact_number: e.target.value })
-            }
+            onChange={(e) => setNewEventContact(e.target.value)}
             className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
           />
 
@@ -712,11 +696,7 @@ export default function EventHeadDashboard() {
                     <option value="Veg">Not required</option>
                     <option value="Non-Veg">Veg</option>
                   </select>
-                  <input
-                    placeholder="Room Number"
-                    onChange={(e) => setNewGuest({ ...newGuest, room_number: e.target.value })}
-                    className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
-                  />
+                  
                   <input
                     placeholder="Pickup Point"
                     onChange={(e) => setNewGuest({ ...newGuest, pickup_point: e.target.value })}
@@ -744,15 +724,7 @@ export default function EventHeadDashboard() {
                     onChange={(e) => setNewGuest({ ...newGuest, special_requests: e.target.value })}
                     className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none md:col-span-2"
                   />
-                  <select
-                    onChange={(e) => setNewGuest({ ...newGuest, status: e.target.value })}
-                    className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="checked_in">Checked In</option>
-                    <option value="checked_out">Checked Out</option>
-                  </select>
+                  
 
                 </div>
 
@@ -842,16 +814,11 @@ export default function EventHeadDashboard() {
                           <option value="">Food Preferences</option>
                           <option value="Veg">Veg</option>
                           <option value="Non-Veg">Not required</option>
-                          
-                          
-                          
+
+
+
                         </select>
-                        <input
-                          value={guest.room_number}
-                          onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, room_number: e.target.value } : item))}
-                          placeholder="Room Number"
-                          className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
-                        />
+                        
                         <input
                           value={guest.pickup_point}
                           onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, pickup_point: e.target.value } : item))}
@@ -882,16 +849,7 @@ export default function EventHeadDashboard() {
                           placeholder="Special Requests"
                           className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none md:col-span-2"
                         />
-                        <select
-                          value={guest.status}
-                          onChange={(e) => setGuests((prev) => prev.map((item) => item.id === guest.id ? { ...item, status: e.target.value } : item))}
-                          className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="confirmed">Confirmed</option>
-                          <option value="checked_in">Checked In</option>
-                          <option value="checked_out">Checked Out</option>
-                        </select>
+                        
 
                       </div>
 

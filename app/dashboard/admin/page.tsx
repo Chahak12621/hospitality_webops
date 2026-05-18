@@ -42,14 +42,12 @@ type GuestType = {
   guest_phone: string;
   guest_email: string;
   guest_food_preferences: string;
-  room_number: string;
   pickup_point: string;
   dropoff_point: string;
   arrival_date: string;
   departure_date: string;
   special_requests: string;
   health_issues: string;
-  accommodation_required: boolean;
   status: string;
 };
 
@@ -182,6 +180,14 @@ export default function AdminDashboard() {
       .eq("id", memberId);
 
     if (!error) await fetchData();
+  };
+  const updateGuestStatus = async (guestId: string, status: string) => {
+    const { error } = await supabase
+      .from("guests")
+      .update({ status })
+      .eq("id", guestId);
+    if (error) { alert(error.message); return; }
+    setGuests((prev) => prev.map((g) => g.id === guestId ? { ...g, status } : g));
   };
 
   return (
@@ -436,10 +442,16 @@ export default function AdminDashboard() {
                             <div key={guest.id} className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur-sm">
                               <div className="mb-3 flex items-start justify-between gap-2">
                                 <h4 className="font-black text-[#0b0705]">{guest.guest_name}</h4>
-                                <span className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-bold ${statusCfg.color}`}>
-                                  {statusCfg.icon}
-                                  {statusCfg.label}
-                                </span>
+                                <select
+                                  value={guest.status}
+                                  onChange={(e) => updateGuestStatus(guest.id, e.target.value)}
+                                  className="rounded-full border px-2.5 py-1 text-[10px] font-bold outline-none cursor-pointer bg-white"
+                                >
+                                  <option value="pending">Pending</option>
+                                  <option value="confirmed">Confirmed</option>
+                                  <option value="checked_in">Checked In</option>
+                                  <option value="checked_out">Checked Out</option>
+                                </select>
                               </div>
 
                               <div className="flex flex-col gap-1.5 text-xs text-[#4a3d52]">
@@ -458,11 +470,7 @@ export default function AdminDashboard() {
                                     <Utensils className="h-3 w-3 flex-shrink-0 text-[#703c84]" /> {guest.guest_food_preferences}
                                   </span>
                                 )}
-                                {guest.room_number && (
-                                  <span className="flex items-center gap-1.5">
-                                    <BedDouble className="h-3 w-3 flex-shrink-0 text-[#703c84]" /> Room {guest.room_number}
-                                  </span>
-                                )}
+                                
                                 {(guest.pickup_point || guest.dropoff_point) && (
                                   <span className="flex items-start gap-1.5">
                                     <Car className="h-3 w-3 flex-shrink-0 text-[#703c84] mt-0.5" />

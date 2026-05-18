@@ -11,6 +11,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState("");
 
   // ─────────────────────────────────────────────
   // LOGIN
@@ -26,6 +27,58 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
+      // --------- Check Paradox Team ---------
+      const { data: paradox } = await supabase
+        .from("paradox")
+        .select("*")
+        .eq("mail", trimmedEmail)
+        .maybeSingle();
+
+      if (paradox) {
+
+        // PASSWORD CHECK
+        if (paradox.password !== password) {
+          alert("Invalid password");
+          return;
+        }
+
+        let department = "";
+
+        if (trimmedEmail === "sports@iitmparadox.org") {
+          department = "sports";
+        }
+
+        else if (trimmedEmail === "technicals@iitmparadox.org") {
+          department = "technical";
+        }
+
+        else if (trimmedEmail === "culturals@iitmparadox.org") {
+          department = "cultural";
+        }
+
+        else if (trimmedEmail === "professionals@iitmparadox.org") {
+          department = "open";
+        }
+
+        sessionStorage.setItem(
+          "portal_email",
+          trimmedEmail
+        );
+
+        sessionStorage.setItem(
+          "portal_role",
+          "paradox_team"
+        );
+
+        sessionStorage.setItem(
+          "portal_department",
+          department
+        );
+
+        router.push("/dashboard/events");
+
+        return;
+      }
       // ───────── CHECK ADMIN ─────────
       const { data: admin } = await supabase
         .from("admins")
@@ -34,6 +87,13 @@ export default function LoginPage() {
         .maybeSingle();
 
       if (admin) {
+
+        // PASSWORD CHECK
+        if (admin.password !== password) {
+          alert("Invalid password");
+          return;
+        }
+
         sessionStorage.setItem(
           "portal_email",
           trimmedEmail
@@ -45,9 +105,9 @@ export default function LoginPage() {
         );
 
         router.push("/dashboard/admin");
+
         return;
       }
-
       // ───────── CHECK EVENT HEAD ─────────
       const { data: eventHead } = await supabase
         .from("event_heads")
@@ -136,7 +196,7 @@ export default function LoginPage() {
 
           <div>
             <p className="text-sm uppercase tracking-[0.4em] text-[#703c84]">
-              Symphony in Shades
+              Paradox 2026
             </p>
 
             <h1 className="mt-6 text-5xl font-black leading-tight text-[#703c84]">
@@ -147,7 +207,7 @@ export default function LoginPage() {
             </h1>
 
             <p className="mt-8 max-w-md text-lg leading-9 text-[#3d3144]">
-             
+
               Paradox celebrates every hidden spectrum within them.
             </p>
           </div>
@@ -191,6 +251,25 @@ export default function LoginPage() {
               className="w-full rounded-2xl border border-white/40 bg-white/50 px-5 py-4 outline-none backdrop-blur-md transition focus:border-[#703c84]"
             />
           </div>
+          {/* PASSWORD */}
+          <div className="mt-6">
+
+            <label className="mb-3 block text-sm font-medium text-[#3d3144]">
+              Password
+            </label>
+
+            <input
+              type="password"
+              value={password}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+              onKeyDown={handleKeyDown}
+              placeholder="Enter your password"
+              autoComplete="off"
+              className="w-full rounded-2xl border border-white/40 bg-white/50 px-5 py-4 outline-none backdrop-blur-md transition focus:border-[#703c84]"
+            />
+          </div>
 
           {/* BUTTON */}
           <button
@@ -198,6 +277,7 @@ export default function LoginPage() {
             disabled={loading}
             className="mt-8 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#f56483] px-6 py-4 font-semibold text-white shadow-[0_15px_40px_rgba(245,100,131,0.35)] transition duration-300 hover:scale-[1.02] hover:bg-[#ea4f74]"
           >
+
             {loading ? "Checking..." : "Continue"}
 
             <ArrowRight className="h-4 w-4" />
