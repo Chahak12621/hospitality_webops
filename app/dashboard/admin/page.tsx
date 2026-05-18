@@ -46,6 +46,8 @@ type GuestType = {
   dropoff_point: string;
   arrival_date: string;
   departure_date: string;
+  arrival_time: string;
+  departure_time: string;
   special_requests: string;
   health_issues: string;
   status: string;
@@ -202,7 +204,7 @@ export default function AdminDashboard() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <div className="h-11 w-11 flex-shrink-0">
-               <img src="logo1.png" alt="paradox-logo" />
+              <img src="logo1.png" alt="paradox-logo" />
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.4em] text-[#703c84]">Paradox '26 · Hospitality</p>
@@ -454,7 +456,7 @@ export default function AdminDashboard() {
                                     <Utensils className="h-3 w-3 flex-shrink-0 text-[#703c84]" /> {guest.guest_food_preferences}
                                   </span>
                                 )}
-                                
+
                                 {(guest.pickup_point || guest.dropoff_point) && (
                                   <span className="flex items-start gap-1.5">
                                     <Car className="h-3 w-3 flex-shrink-0 text-[#703c84] mt-0.5" />
@@ -471,6 +473,23 @@ export default function AdminDashboard() {
                                     {guest.arrival_date && <span>{guest.arrival_date}</span>}
                                     {guest.arrival_date && guest.departure_date && <span>→</span>}
                                     {guest.departure_date && <span>{guest.departure_date}</span>}
+                                  </span>
+                                )}
+                                {(guest.arrival_time || guest.departure_time) && (
+                                  <span className="flex items-center gap-1.5">
+                                    <Clock className="h-3 w-3 flex-shrink-0 text-[#703c84]" />
+
+                                    {guest.arrival_time && (
+                                      <span>Arrival: {guest.arrival_time}</span>
+                                    )}
+
+                                    {guest.arrival_time && guest.departure_time && (
+                                      <span>•</span>
+                                    )}
+
+                                    {guest.departure_time && (
+                                      <span>Departure: {guest.departure_time}</span>
+                                    )}
                                   </span>
                                 )}
                                 {guest.special_requests && (

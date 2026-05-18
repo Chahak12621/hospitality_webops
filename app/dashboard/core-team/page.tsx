@@ -32,11 +32,12 @@ type GuestType = {
   guest_phone: string;
   guest_food_preferences: string;
   special_requests: string;
-  room_number: string;
   pickup_point: string;
   dropoff_point: string;
   arrival_date: string;
   departure_date: string;
+  arrival_time: string;
+  departure_time: string;
   status: string;
 };
 type EventHeadType = {
@@ -158,7 +159,7 @@ export default function CoreTeamDashboard() {
           {/* Left — Logo + Title */}
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 flex-shrink-0">
-               <img src="logo1.png" alt="paradox-logo" />
+              <img src="logo1.png" alt="paradox-logo" />
             </div>
 
             <div>
@@ -451,10 +452,7 @@ export default function CoreTeamDashboard() {
                               <p className="mb-0.5 font-bold text-[#703c84]">Food</p>
                               <p>{guest.guest_food_preferences || "N/A"}</p>
                             </div>
-                            <div>
-                              <p className="mb-0.5 font-bold text-[#703c84]">Room</p>
-                              <p>{guest.room_number || "N/A"}</p>
-                            </div>
+
                             <div>
                               <p className="mb-0.5 font-bold text-[#703c84]">Pickup</p>
                               <p>{guest.pickup_point || "N/A"}</p>
@@ -464,12 +462,35 @@ export default function CoreTeamDashboard() {
                               <p>{guest.dropoff_point || "N/A"}</p>
                             </div>
                             <div>
-                              <p className="mb-0.5 font-bold text-[#703c84]">Arrival</p>
+                              <p className="mb-0.5 font-bold text-[#703c84]">
+                                Arrival Date
+                              </p>
+
                               <p>{guest.arrival_date || "N/A"}</p>
                             </div>
+
                             <div>
-                              <p className="mb-0.5 font-bold text-[#703c84]">Departure</p>
+                              <p className="mb-0.5 font-bold text-[#703c84]">
+                                Departure Date
+                              </p>
+
                               <p>{guest.departure_date || "N/A"}</p>
+                            </div>
+
+                            <div>
+                              <p className="mb-0.5 font-bold text-[#703c84]">
+                                Arrival Time
+                              </p>
+
+                              <p>{guest.arrival_time || "N/A"}</p>
+                            </div>
+
+                            <div>
+                              <p className="mb-0.5 font-bold text-[#703c84]">
+                                Departure Time
+                              </p>
+
+                              <p>{guest.departure_time || "N/A"}</p>
                             </div>
                             <div className="col-span-2">
                               <p className="mb-0.5 font-bold text-[#703c84]">Special Requests</p>
