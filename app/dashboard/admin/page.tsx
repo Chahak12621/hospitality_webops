@@ -204,7 +204,7 @@ export default function AdminDashboard() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <div className="h-11 w-11 flex-shrink-0">
-              <img src="logo1.png" alt="paradox-logo" />
+              <img src="/logo1.png" alt="paradox-logo" />
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.4em] text-[#703c84]">Paradox '26 · Hospitality</p>

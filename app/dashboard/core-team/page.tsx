@@ -159,7 +159,7 @@ export default function CoreTeamDashboard() {
           {/* Left — Logo + Title */}
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 flex-shrink-0">
-              <img src="logo1.png" alt="paradox-logo" />
+              <img src="/logo1.png" alt="paradox-logo" />
             </div>
 
             <div>

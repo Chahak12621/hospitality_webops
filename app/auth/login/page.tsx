@@ -283,38 +283,44 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={async (e) => {
-
                 const value = e.target.value;
 
                 setEmail(value);
 
-                await checkIfPasswordRequired(value);
+                if (value.trim()) {
+                  await checkIfPasswordRequired(value);
+                } else {
+                  setRequiresPassword(false);
+                }
               }}
-              onKeyDown={handleKeyDown}
-              placeholder="Enter your email"
-              autoComplete="off"
-              className="w-full rounded-2xl border border-white/40 bg-white/50 px-5 py-4 outline-none backdrop-blur-md transition focus:border-[#703c84]"
+            onKeyDown={handleKeyDown}
+            placeholder="Enter your email"
+            autoComplete="off"
+            className="w-full rounded-2xl border border-white/40 bg-white/50 px-5 py-4 outline-none backdrop-blur-md transition focus:border-[#703c84]"
             />
           </div>
           {/* PASSWORD */}
-          <div className="mt-6">
+          {/* PASSWORD */}
+          {requiresPassword && (
+            <div className="mt-6">
 
-            <label className="mb-3 block text-sm font-medium text-[#3d3144]">
-              Password
-            </label>
+              <label className="mb-3 block text-sm font-medium text-[#3d3144]">
+                Password
+              </label>
 
-            <input
-              type="password"
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
-              onKeyDown={handleKeyDown}
-              placeholder="Enter your password"
-              autoComplete="off"
-              className="w-full rounded-2xl border border-white/40 bg-white/50 px-5 py-4 outline-none backdrop-blur-md transition focus:border-[#703c84]"
-            />
-          </div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
+                onKeyDown={handleKeyDown}
+                placeholder="Enter your password"
+                autoComplete="off"
+                className="w-full rounded-2xl border border-white/40 bg-white/50 px-5 py-4 outline-none backdrop-blur-md transition focus:border-[#703c84]"
+              />
+            </div>
+          )}
 
           {/* BUTTON */}
           <button
