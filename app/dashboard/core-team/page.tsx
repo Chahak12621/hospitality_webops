@@ -579,10 +579,7 @@ export default function CoreTeamDashboard() {
 
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {filteredCoreTeam.map((member) => {
-            const assignedEvent = member.assigned_event_id
-              ? events.find((e) => e.id === member.assigned_event_id)
-              : null;
-
+            
             return (
               <div
                 key={member.id}
@@ -592,33 +589,14 @@ export default function CoreTeamDashboard() {
                   <span className="inline-block rounded-full bg-gradient-to-r from-[#ebdbe6] to-[#d8d0e8] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#703c84]">
                     {member.role}
                   </span>
-                  {assignedEvent ? (
-                    <span className="flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-100/60 px-3 py-1 text-[10px] font-bold text-emerald-700">
-                      <CheckCircle2 className="h-3 w-3" /> Assigned
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 rounded-full border border-amber-200 bg-amber-100/60 px-3 py-1 text-[10px] font-bold text-amber-700">
-                      <Clock className="h-3 w-3" /> Unassigned
-                    </span>
-                  )}
+                  
                 </div>
 
                 <h3 className="text-lg font-black text-[#0b0705]">{member.name}</h3>
                 <p className="mt-1 break-all text-xs text-[#4a3d52]">{member.email}</p>
                 <p className="mt-0.5 text-xs text-[#703c84]">{member.department || "Hospitality"}</p>
 
-                {assignedEvent ? (
-                  <div className="mt-4 rounded-xl border border-[#703c84]/20 bg-[#f8f5ff]/70 px-4 py-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#703c84]">Assigned Event</p>
-                    <p className="mt-1 font-bold text-[#0b0705] text-sm">{assignedEvent.event_name}</p>
-                    <p className="text-xs text-[#5a4a60]">{assignedEvent.venue} · {assignedEvent.event_date}</p>
-                    
-                  </div>
-                ) : (
-                  <div className="mt-4 rounded-xl border border-dashed border-[#703c84]/20 bg-white/40 px-4 py-3 text-xs text-[#a090a8]">
-                    Not assigned to any event
-                  </div>
-                )}
+                
 
                 <a
                   href={`tel:${member.contact_number}`}
