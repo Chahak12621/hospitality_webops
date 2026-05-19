@@ -918,11 +918,18 @@ export default function EventHeadDashboard() {
 
                           <input
                             type="date"
+                            value={guest.arrival_date || ""}
                             onChange={(e) =>
-                              setNewGuest({
-                                ...newGuest,
-                                arrival_date: e.target.value,
-                              })
+                              setGuests((prev) =>
+                                prev.map((item) =>
+                                  item.id === guest.id
+                                    ? {
+                                      ...item,
+                                      arrival_date: e.target.value,
+                                    }
+                                    : item
+                                )
+                              )
                             }
                             className="w-full rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                           />
@@ -935,11 +942,18 @@ export default function EventHeadDashboard() {
 
                           <input
                             type="time"
+                            value={guest.arrival_time || ""}
                             onChange={(e) =>
-                              setNewGuest({
-                                ...newGuest,
-                                arrival_time: e.target.value,
-                              })
+                              setGuests((prev) =>
+                                prev.map((item) =>
+                                  item.id === guest.id
+                                    ? {
+                                      ...item,
+                                      arrival_time: e.target.value,
+                                    }
+                                    : item
+                                )
+                              )
                             }
                             className="w-full rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                           />
@@ -952,11 +966,18 @@ export default function EventHeadDashboard() {
 
                           <input
                             type="date"
+                            value={guest.departure_date || ""}
                             onChange={(e) =>
-                              setNewGuest({
-                                ...newGuest,
-                                departure_date: e.target.value,
-                              })
+                              setGuests((prev) =>
+                                prev.map((item) =>
+                                  item.id === guest.id
+                                    ? {
+                                      ...item,
+                                      departure_date: e.target.value,
+                                    }
+                                    : item
+                                )
+                              )
                             }
                             className="w-full rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                           />
@@ -969,11 +990,18 @@ export default function EventHeadDashboard() {
 
                           <input
                             type="time"
+                            value={guest.departure_time || ""}
                             onChange={(e) =>
-                              setNewGuest({
-                                ...newGuest,
-                                departure_time: e.target.value,
-                              })
+                              setGuests((prev) =>
+                                prev.map((item) =>
+                                  item.id === guest.id
+                                    ? {
+                                      ...item,
+                                      departure_time: e.target.value,
+                                    }
+                                    : item
+                                )
+                              )
                             }
                             className="w-full rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
                           />
