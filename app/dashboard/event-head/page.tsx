@@ -352,21 +352,23 @@ export default function EventHeadDashboard() {
     <main className="min-h-screen bg-[#f8f6ff] p-4 md:p-8">
 
       {/* HEADER */}
-      <div className="mb-10">
+      <div className="mb-10 flex items-start justify-between">
+        <div>
+          <h1 className="text-4xl font-black text-[#2b124c]">
+            Event Head Dashboard
+          </h1>
 
-        <h1 className="text-4xl font-black text-[#2b124c]">
-          Event Head Dashboard
-        </h1>
-
-        <p className="mt-3 text-[#6f5b8e]">
-          Manage your events and guests
-        </p>
+          <p className="mt-3 text-[#6f5b8e]">
+            Manage your events and guests
+          </p>
+        </div>
+        
         <button
           onClick={async () => {
             await supabase.auth.signOut();
             window.location.href = "/";
           }}
-          className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
+          className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72] whitespace-nowrap ml-4"
         >
           <LogOut className="h-4 w-4" />
           Logout
