@@ -429,27 +429,38 @@ export default function EventHeadDashboard() {
             </option>
           </select>
 
-          <input
-            type="date"
-            onChange={(e) =>
-              setNewEvent({
-                ...newEvent,
-                event_date: e.target.value,
-              })
-            }
-            className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
-          />
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-[#2b124c]">
+              Event Date
+            </label>
 
-          <input
-            type="time"
-            onChange={(e) =>
-              setNewEvent({
-                ...newEvent,
-                event_time: e.target.value,
-              })
-            }
-            className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
-          />
+            <input
+              type="date"
+              onChange={(e) =>
+                setNewEvent({
+                  ...newEvent,
+                  event_date: e.target.value,
+                })
+              }
+              className="w-full rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+            />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-[#2b124c]">
+              Event Time
+            </label>
+            <input
+
+              type="time"
+              onChange={(e) =>
+                setNewEvent({
+                  ...newEvent,
+                  event_time: e.target.value,
+                })
+              }
+              className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none"
+            />
+          </div>
 
           <input
             placeholder="Venue"
@@ -724,6 +735,7 @@ export default function EventHeadDashboard() {
 
                     <input
                       type="date"
+                      value={newGuest.arrival_date}
                       onChange={(e) =>
                         setNewGuest({
                           ...newGuest,
@@ -741,6 +753,7 @@ export default function EventHeadDashboard() {
 
                     <input
                       type="time"
+                      value={newGuest.arrival_time}
                       onChange={(e) =>
                         setNewGuest({
                           ...newGuest,
@@ -758,6 +771,7 @@ export default function EventHeadDashboard() {
 
                     <input
                       type="date"
+                      value={newGuest.departure_date}
                       onChange={(e) =>
                         setNewGuest({
                           ...newGuest,
@@ -775,6 +789,7 @@ export default function EventHeadDashboard() {
 
                     <input
                       type="time"
+                      value={newGuest.departure_time}
                       onChange={(e) =>
                         setNewGuest({
                           ...newGuest,

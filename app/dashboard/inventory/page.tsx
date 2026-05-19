@@ -413,15 +413,11 @@ export default function InventoryDashboard() {
             className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
           >
             <option value="available">
-              Available
+              recieved
             </option>
 
             <option value="reserved">
-              Reserved
-            </option>
-
-            <option value="in-use">
-              In Use
+              dispatched
             </option>
           </select>
         </div>
