@@ -109,13 +109,14 @@ export default function EventsDashboard() {
       <h1 className="mb-8 text-4xl font-black text-[#703c84]">
         Department Events
       </h1>
+
       <button
-                    onClick={async () => { await supabase.auth.signOut(); window.location.href = "/"; }}
-                    className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition hover:scale-105 hover:bg-[#e14f72]"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Logout
-                  </button>
+        onClick={async () => { await supabase.auth.signOut(); window.location.href = "/"; }}
+        className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition hover:scale-105 hover:bg-[#e14f72]"
+      >
+        <LogOut className="h-4 w-4" />
+        Logout
+      </button>
 
       {events.length === 0 ? (
         <div className="rounded-3xl bg-white p-10 shadow">

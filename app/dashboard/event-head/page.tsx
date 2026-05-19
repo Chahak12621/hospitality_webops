@@ -352,17 +352,15 @@ export default function EventHeadDashboard() {
     <main className="min-h-screen bg-[#f8f6ff] p-4 md:p-8">
 
       {/* HEADER */}
-      <div className="mb-10 flex items-start justify-between">
-        <div>
-          <h1 className="text-4xl font-black text-[#2b124c]">
-            Event Head Dashboard
-          </h1>
+      <div className="mb-10">
 
-          <p className="mt-3 text-[#6f5b8e]">
-            Manage your events and guests
-          </p>
-        </div>
-        
+        <h1 className="text-4xl font-black text-[#2b124c]">
+          Event Head Dashboard
+        </h1>
+
+        <p className="mt-3 text-[#6f5b8e]">
+          Manage your events and guests
+        </p>
         <button
           onClick={async () => {
             await supabase.auth.signOut();
