@@ -714,7 +714,7 @@ export default function EventHeadDashboard() {
                     className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none bg-white"
                   >
                     <option value="">Food Preferences</option>
-                    <option value="Veg">Not required</option>
+                    <option value="Veg">N/A</option>
                     <option value="Non-Veg">Veg</option>
                   </select>
 
@@ -892,7 +892,7 @@ export default function EventHeadDashboard() {
                           className="rounded-xl border border-[#ddd2ff] px-4 py-3 outline-none bg-white"
                         >
                           <option value="">Food Preferences</option>
-                          <option value="Veg">Not required</option>
+                          <option value="Veg">N/A</option>
                           <option value="Non-Veg">Veg</option>
 
 
