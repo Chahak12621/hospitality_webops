@@ -22,6 +22,7 @@ import {
   CheckCircle2,
   Clock,
   X,
+    Package,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -113,6 +114,14 @@ export default function AdminDashboard() {
   const [assigning, setAssigning] = useState(false);
 
   useEffect(() => {
+    const role = sessionStorage.getItem("portal_role");
+    if (role !== "admin") {
+      alert("Unauthorized");
+      window.location.href = "/";
+    }
+  }, []);
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -202,32 +211,53 @@ export default function AdminDashboard() {
       {/* NAVBAR */}
       <nav className="sticky top-0 z-30 border-b border-white/60 bg-white/50 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <div className="h-11 w-11 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 flex-shrink-0 sm:h-11 sm:w-11">
               <img src="/logo1.png" alt="paradox-logo" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-[#703c84]">Paradox '26 · Hospitality</p>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-[#703c84] sm:text-xs sm:tracking-[0.4em]">
+                Paradox '26 · Hospitality
+              </p>
               <div className="flex items-center gap-2">
-                <LayoutDashboard className="h-4 w-4 text-[#f56483]" />
-                <h1 className="text-xl font-black tracking-tight text-[#0b0705]">Admin Dashboard</h1>
+                <LayoutDashboard className="h-3.5 w-3.5 text-[#f56483] sm:h-4 sm:w-4" />
+                <h1 className="text-base font-black tracking-tight text-[#0b0705] sm:text-xl">
+                  Admin Dashboard
+                </h1>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard/inventory" className="rounded-full border-2 border-[#703c84] bg-white/60 px-5 py-2.5 text-sm font-semibold text-[#703c84] backdrop-blur-md transition hover:scale-105 hover:bg-white/80">
+          <div className="flex items-center gap-2">
+            <Link
+              href="/dashboard/inventory"
+              className="hidden sm:block rounded-full border-2 border-[#703c84] bg-white/60 px-5 py-2.5 text-sm font-semibold text-[#703c84] backdrop-blur-md transition hover:scale-105 hover:bg-white/80"
+            >
               Inventory
             </Link>
             <button
-              onClick={async () => { await supabase.auth.signOut(); window.location.href = "/"; }}
-              className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition hover:scale-105 hover:bg-[#e14f72]"
+              onClick={async () => {
+                sessionStorage.clear();
+                await supabase.auth.signOut();
+                window.location.href = "/";
+              }}
+              className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition hover:scale-105 hover:bg-[#e14f72]"
             >
               <LogOut className="h-4 w-4" />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>
       </nav>
+      {/* Mobile-only inventory link */}
+      <div className="mx-4 mt-4 sm:hidden">
+        <Link
+          href="/dashboard/inventory"
+          className="flex items-center justify-center gap-2 rounded-full border-2 border-[#703c84] bg-white/60 py-2.5 text-sm font-semibold text-[#703c84] backdrop-blur-md"
+        >
+          <Package className="h-4 w-4" />
+          Go to Inventory
+        </Link>
+      </div>
 
       <div className="mx-auto max-w-7xl px-6 py-10">
         {/* Header & Search */}

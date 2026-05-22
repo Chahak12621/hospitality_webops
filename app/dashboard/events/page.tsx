@@ -35,6 +35,14 @@ export default function EventsDashboard() {
   const [guests, setGuests] = useState<GuestType[]>([]);
 
   useEffect(() => {
+  const role = sessionStorage.getItem("portal_role");
+  if (role !== "paradox_team") {
+    alert("Unauthorized");
+    window.location.href = "/";
+  }
+}, []);
+
+  useEffect(() => {
     fetchEvents();
   }, []);
 

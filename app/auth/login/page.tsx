@@ -127,25 +127,19 @@ export default function LoginPage() {
         .maybeSingle();
 
       if (admin) {
-
-        // PASSWORD CHECK
         if (admin.password !== password) {
           alert("Invalid password");
           return;
         }
 
-        sessionStorage.setItem(
-          "portal_email",
-          trimmedEmail
-        );
+        sessionStorage.setItem("portal_email", trimmedEmail);
+        sessionStorage.setItem("portal_role", admin.role ?? "admin");
 
-        sessionStorage.setItem(
-          "portal_role",
-          "admin"
-        );
-
-        router.push("/dashboard/admin");
-
+        if (admin.role === "inventory") {
+          router.push("/dashboard/inventory");
+        } else {
+          router.push("/dashboard/admin");
+        }
         return;
       }
       // ───────── CHECK EVENT HEAD ─────────
@@ -293,10 +287,10 @@ export default function LoginPage() {
                   setRequiresPassword(false);
                 }
               }}
-            onKeyDown={handleKeyDown}
-            placeholder="Enter your email"
-            autoComplete="off"
-            className="w-full rounded-2xl border border-white/40 bg-white/50 px-5 py-4 outline-none backdrop-blur-md transition focus:border-[#703c84]"
+              onKeyDown={handleKeyDown}
+              placeholder="Enter your email"
+              autoComplete="off"
+              className="w-full rounded-2xl border border-white/40 bg-white/50 px-5 py-4 outline-none backdrop-blur-md transition focus:border-[#703c84]"
             />
           </div>
           {/* PASSWORD */}

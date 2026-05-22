@@ -42,6 +42,14 @@ export default function InventoryDashboard() {
     location: "",
   });
 
+  useEffect(() => {
+  const role = sessionStorage.getItem("portal_role");
+  if (role !== "inventory" && role !== "admin") {
+    alert("Unauthorized");
+    window.location.href = "/";
+  }
+}, []);
+
   // ─────────────────────────────────────────────
   // FETCH INVENTORY
   // ─────────────────────────────────────────────

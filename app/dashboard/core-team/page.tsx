@@ -69,24 +69,29 @@ export default function CoreTeamDashboard() {
   const [teamSearch, setTeamSearch] = useState("");
   const [coreTeam, setCoreTeam] = useState<CoreTeamType[]>([]);
 
+  useEffect(() => {
+    const role = sessionStorage.getItem("portal_role");
+    if (role !== "core_team") {
+      alert("Unauthorized");
+      window.location.href = "/";
+    }
+  }, []);
+
   // ─────────────────────────────────────────────
   // FETCH ASSIGNED EVENTS
   // ─────────────────────────────────────────────
   useEffect(() => {
     fetchAssignedEvents();
-    fetchData(); 
+    fetchCoreTeam();
   }, []);
-  
-  const fetchData = async () => {
-  const [{ data: eventData }, { data: guestData }, { data: coreTeamData }] = await Promise.all([
-    supabase.from("events").select("*").order("event_date", { ascending: true }),
-    supabase.from("guests").select("*"),
-    supabase.from("core_team").select("*").order("name", { ascending: true }),
-  ]);
-  setEvents(eventData || []);
-  setGuests(guestData || []);
-  setCoreTeam(coreTeamData || []);
-};
+  const fetchCoreTeam = async () => {
+    const { data } = await supabase
+      .from("core_team")
+      .select("*")
+      .order("name", { ascending: true });
+    setCoreTeam(data || []);
+  };
+
 
   const filteredCoreTeam = useMemo(
     () => coreTeam.filter(
@@ -119,7 +124,7 @@ export default function CoreTeamDashboard() {
         setLoading(false);
         return;
       }
-      
+
 
       // FETCH ASSIGNED EVENT
       const { data: eventData, error: eventError } = await supabase
@@ -560,58 +565,58 @@ export default function CoreTeamDashboard() {
           })}
         </div>
         {/* CORE TEAM SECTION */}
-      <section className="mb-16">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <span className="h-1 w-8 rounded-full bg-[#703c84]" />
-            <h2 className="text-2xl font-black text-[#703c84]">Core Team Members</h2>
+        <section className="mb-16">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="h-1 w-8 rounded-full bg-[#703c84]" />
+              <h2 className="text-2xl font-black text-[#703c84]">Core Team Members</h2>
+            </div>
+            <div className="relative w-full sm:w-[280px]">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#703c84]" />
+              <input
+                placeholder="Search team member..."
+                value={teamSearch}
+                onChange={(e) => setTeamSearch(e.target.value)}
+                className="w-full rounded-full border-2 border-[#703c84]/20 bg-white/70 py-2.5 pl-11 pr-5 text-sm outline-none placeholder:text-[#a090a8] focus:border-[#703c84] transition"
+              />
+            </div>
           </div>
-          <div className="relative w-full sm:w-[280px]">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#703c84]" />
-            <input
-              placeholder="Search team member..."
-              value={teamSearch}
-              onChange={(e) => setTeamSearch(e.target.value)}
-              className="w-full rounded-full border-2 border-[#703c84]/20 bg-white/70 py-2.5 pl-11 pr-5 text-sm outline-none placeholder:text-[#a090a8] focus:border-[#703c84] transition"
-            />
-          </div>
-        </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {filteredCoreTeam.map((member) => {
-            
-            return (
-              <div
-                key={member.id}
-                className="rounded-[24px] border border-white/60 bg-white/60 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)] backdrop-blur-md transition duration-300 hover:-translate-y-1"
-              >
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <span className="inline-block rounded-full bg-gradient-to-r from-[#ebdbe6] to-[#d8d0e8] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#703c84]">
-                    {member.role}
-                  </span>
-                  
-                </div>
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredCoreTeam.map((member) => {
 
-                <h3 className="text-lg font-black text-[#0b0705]">{member.name}</h3>
-                <p className="mt-1 break-all text-xs text-[#4a3d52]">{member.email}</p>
-                <p className="mt-0.5 text-xs text-[#703c84]">{member.department || "Hospitality"}</p>
-
-                
-
-                <a
-                  href={`tel:${member.contact_number}`}
-                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#703c84] to-[#f56483] px-4 py-2.5 text-xs font-bold text-white shadow-[0_6px_20px_rgba(112,60,132,0.2)] transition hover:scale-105"
+              return (
+                <div
+                  key={member.id}
+                  className="rounded-[24px] border border-white/60 bg-white/60 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)] backdrop-blur-md transition duration-300 hover:-translate-y-1"
                 >
-                  <Phone className="h-3.5 w-3.5" />
-                  Dial Member
-                </a>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <span className="inline-block rounded-full bg-gradient-to-r from-[#ebdbe6] to-[#d8d0e8] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#703c84]">
+                      {member.role}
+                    </span>
+
+                  </div>
+
+                  <h3 className="text-lg font-black text-[#0b0705]">{member.name}</h3>
+                  <p className="mt-1 break-all text-xs text-[#4a3d52]">{member.email}</p>
+                  <p className="mt-0.5 text-xs text-[#703c84]">{member.department || "Hospitality"}</p>
+
+
+
+                  <a
+                    href={`tel:${member.contact_number}`}
+                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#703c84] to-[#f56483] px-4 py-2.5 text-xs font-bold text-white shadow-[0_6px_20px_rgba(112,60,132,0.2)] transition hover:scale-105"
+                  >
+                    <Phone className="h-3.5 w-3.5" />
+                    Dial Member
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       </div>
-      
+
 
       {/* FOOTER */}
       <footer className="relative z-10 mt-10 border-t border-white/40 bg-white/20 py-6 text-center backdrop-blur-xl">

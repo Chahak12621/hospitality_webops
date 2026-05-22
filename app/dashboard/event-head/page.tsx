@@ -74,6 +74,14 @@ export default function EventHeadDashboard() {
   });
 
   useEffect(() => {
+  const role = sessionStorage.getItem("portal_role");
+  if (role !== "event_head") {
+    alert("Unauthorized");
+    window.location.href = "/";
+  }
+}, []);
+
+  useEffect(() => {
     const role = sessionStorage.getItem("portal_role");
 
     if (role !== "event_head") {
