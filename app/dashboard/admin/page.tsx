@@ -22,7 +22,7 @@ import {
   CheckCircle2,
   Clock,
   X,
-    Package,
+  Package,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -112,6 +112,8 @@ export default function AdminDashboard() {
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
   const [assigningEventId, setAssigningEventId] = useState<string | null>(null);
   const [assigning, setAssigning] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<EventType | null>(null);
+  const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
 
   useEffect(() => {
     const role = sessionStorage.getItem("portal_role");
@@ -191,6 +193,27 @@ export default function AdminDashboard() {
       .eq("id", memberId);
 
     if (!error) await fetchData();
+  };
+  const deleteEvent = async (eventId: string) => {
+    if (!confirm("Delete this event? This cannot be undone.")) return;
+    const { error } = await supabase.from("events").delete().eq("id", eventId);
+    if (!error) await fetchData();
+  };
+  const updateEvent = async () => {
+    if (!editingEvent) return;
+    const { error } = await supabase
+      .from("events")
+      .update({
+        event_name: editingEvent.event_name,
+        description: editingEvent.description,
+        event_date: editingEvent.event_date,
+        event_time: editingEvent.event_time,
+        venue: editingEvent.venue,
+        department: editingEvent.department,
+      })
+      .eq("id", editingEvent.id);
+    if (!error) { setEditingEvent(null); await fetchData(); }
+    else alert(error.message);
   };
   const updateGuestStatus = async (guestId: string, status: string) => {
     const { error } = await supabase
@@ -324,6 +347,18 @@ export default function AdminDashboard() {
                           <span className={`rounded-full border bg-gradient-to-r px-3 py-1 text-xs font-bold uppercase tracking-wider ${deptColor}`}>
                             {event.department}
                           </span>
+                          <button
+                            onClick={() => setEditingEvent(event)}
+                            className="rounded-full border border-[#703c84]/30 bg-white/60 px-3 py-1 text-xs font-semibold text-[#703c84] transition hover:bg-[#703c84] hover:text-white"
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            onClick={() => deleteEvent(event.id)}
+                            className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-500 transition hover:bg-red-500 hover:text-white"
+                          >
+                            🗑️ Delete
+                          </button>
                         </div>
                         <p className="mt-2 max-w-2xl text-sm leading-6 text-[#4a3d52]">{event.description}</p>
 
@@ -632,7 +667,31 @@ export default function AdminDashboard() {
           </div>
         </section>
       </div>
-
+      {editingEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="w-full max-w-lg rounded-[28px] bg-white p-8 shadow-2xl">
+            <h3 className="mb-5 text-xl font-black text-[#703c84]">Edit Event</h3>
+            {/* one input per field, bound to editingEvent state */}
+            {["event_name", "description", "event_date", "event_time", "venue", "department"].map((field) => (
+              <input
+                key={field}
+                value={(editingEvent as any)[field]}
+                onChange={(e) => setEditingEvent({ ...editingEvent, [field]: e.target.value })}
+                placeholder={field.replace("_", " ")}
+                className="mb-3 w-full rounded-xl border border-[#703c84]/20 px-4 py-2.5 text-sm outline-none focus:border-[#703c84]"
+              />
+            ))}
+            <div className="mt-4 flex gap-3">
+              <button onClick={updateEvent} className="flex-1 rounded-full bg-gradient-to-r from-[#703c84] to-[#f56483] py-2.5 text-sm font-bold text-white">
+                Save Changes
+              </button>
+              <button onClick={() => setEditingEvent(null)} className="flex-1 rounded-full border border-slate-200 py-2.5 text-sm font-semibold text-slate-500">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* FOOTER */}
       <footer className="relative z-10 border-t border-white/40 bg-white/20 py-6 text-center backdrop-blur-xl">
         <p className="text-sm tracking-wide text-[#3d3144]">
