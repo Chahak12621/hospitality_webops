@@ -143,7 +143,10 @@ export default function AdminDashboard() {
   };
 
   const filteredEvents = useMemo(
-    () => events.filter((e) => e.event_name.toLowerCase().includes(search.toLowerCase())),
+    () => events.filter((e) =>
+      e.event_name.toLowerCase().includes(search.toLowerCase()) ||
+      e.department.toLowerCase().includes(search.toLowerCase())
+    ),
     [events, search]
   );
 
@@ -293,7 +296,7 @@ export default function AdminDashboard() {
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#703c84]" />
             <input
               type="text"
-              placeholder="Search event name..."
+              placeholder="Search by event name or department..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full rounded-full border-2 border-[#703c84]/20 bg-white/70 py-3 pl-11 pr-5 text-sm outline-none placeholder:text-[#a090a8] focus:border-[#703c84] transition"
