@@ -432,7 +432,7 @@ export default function EventHeadDashboard() {
               Sports
             </option>
 
-            <option value="open">
+            <option value="central">
               Central
             </option>
           </select>

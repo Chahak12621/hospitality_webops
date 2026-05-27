@@ -675,7 +675,7 @@ export default function AdminDashboard() {
           <div className="w-full max-w-lg rounded-[28px] bg-white p-8 shadow-2xl">
             <h3 className="mb-5 text-xl font-black text-[#703c84]">Edit Event</h3>
             {/* one input per field, bound to editingEvent state */}
-            {["event_name", "description", "event_date", "event_time", "venue", "department"].map((field) => (
+            {(["event_name", "description", "event_date", "event_time", "venue"] as const).map((field) => (
               <input
                 key={field}
                 value={(editingEvent as any)[field]}
@@ -684,6 +684,16 @@ export default function AdminDashboard() {
                 className="mb-3 w-full rounded-xl border border-[#703c84]/20 px-4 py-2.5 text-sm outline-none focus:border-[#703c84]"
               />
             ))}
+            <select
+              value={editingEvent.department}
+              onChange={(e) => setEditingEvent({ ...editingEvent, department: e.target.value })}
+              className="mb-3 w-full rounded-xl border border-[#703c84]/20 px-4 py-2.5 text-sm outline-none focus:border-[#703c84] bg-white"
+            >
+              <option value="technical">Technical</option>
+              <option value="cultural">Cultural</option>
+              <option value="sports">Sports</option>
+              <option value="Central">Central</option>
+            </select>
             <div className="mt-4 flex gap-3">
               <button onClick={updateEvent} className="flex-1 rounded-full bg-gradient-to-r from-[#703c84] to-[#f56483] py-2.5 text-sm font-bold text-white">
                 Save Changes
