@@ -97,7 +97,7 @@ export default function LoginPage() {
         }
 
         else if (trimmedEmail === "professionals@iitmparadox.org") {
-          department = "open";
+          department = "central";
         }
 
         sessionStorage.setItem(
