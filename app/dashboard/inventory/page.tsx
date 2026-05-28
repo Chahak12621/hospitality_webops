@@ -43,12 +43,12 @@ export default function InventoryDashboard() {
   });
 
   useEffect(() => {
-  const role = sessionStorage.getItem("portal_role");
-  if (role !== "inventory" && role !== "admin") {
-    alert("Unauthorized");
-    window.location.href = "/";
-  }
-}, []);
+    const role = sessionStorage.getItem("portal_role");
+    if (role !== "inventory" && role !== "admin") {
+      alert("Unauthorized");
+      window.location.href = "/";
+    }
+  }, []);
 
   // ─────────────────────────────────────────────
   // FETCH INVENTORY
@@ -201,7 +201,7 @@ export default function InventoryDashboard() {
     <main className="min-h-screen bg-[#f8f6ff] p-4 md:p-8">
 
       {/* HEADER */}
-      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="mb-8 flex flex-col gap-4">
 
         <div>
           <h1 className="text-3xl font-black text-[#2b124c]">
@@ -212,260 +212,264 @@ export default function InventoryDashboard() {
             Manage hospitality inventory items.
           </p>
         </div>
-        
+
 
         {/* SEARCH */}
         <div className="relative w-full md:w-[320px]">
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
 
-          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7d6b99]" />
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7d6b99]" />
 
-          <input
-            type="text"
-            placeholder="Search inventory..."
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-            className="w-full rounded-2xl border border-[#ddd3f5] bg-white py-4 pl-11 pr-4 outline-none focus:border-[#8d5cf6]"
-          />
-        </div>
-        <button
-                      onClick={async () => {
-                        await supabase.auth.signOut();
-                        window.location.href = "/";
-                      }}
-                      className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Logout
-                    </button>
-      </div>
-      
-
-      
-
-      {/* INVENTORY LIST */}
-      <section className="mt-10">
-
-        <h2 className="mb-5 text-2xl font-bold text-[#2b124c]">
-          Inventory Items
-        </h2>
-
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-
-          {filteredInventory.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-[28px] border border-[#e5dbff] bg-white p-5"
-            >
-
-              <div className="flex items-start justify-between gap-4">
-
-                <div>
-                  <h3 className="text-xl font-bold text-[#2b124c]">
-                    {item.item_name}
-                  </h3>
-
-                  <p className="mt-2 text-sm text-[#6b3df0]">
-                    {item.category}
-                  </p>
-                </div>
-
-                <div className="rounded-full bg-[#efe7ff] px-3 py-1 text-xs font-semibold text-[#6b3df0]">
-                  {item.status}
-                </div>
-              </div>
-
-              <div className="mt-5 space-y-2 text-sm text-[#5f4b7a]">
-
-                <p>
-                  Quantity: {item.quantity}
-                </p>
-
-                <p>
-                  Unit: {item.unit || "N/A"}
-                </p>
-
-                <p>
-                  Location: {item.location || "N/A"}
-                </p>
-
-                <p>
-                  Notes: {item.notes || "None"}
-                </p>
-              </div>
-
-              <div className="mt-6 flex gap-3">
-
-                <button
-                  onClick={() => editItem(item)}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#2b124c] px-4 py-3 text-sm font-semibold text-white"
-                >
-                  <Pencil className="h-4 w-4" />
-
-                  Edit
-                </button>
-
-                <button
-                  onClick={() =>
-                    deleteItem(item.id)
-                  }
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-3 text-sm font-semibold text-white"
-                >
-                  <Trash2 className="h-4 w-4" />
-
-                  Delete
-                </button>
-              </div>
+              <input
+                type="text"
+                placeholder="Search inventory..."
+                value={search}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
+                className="w-full rounded-2xl border border-[#ddd3f5] bg-white py-4 pl-11 pr-4 outline-none focus:border-[#8d5cf6]"
+              />
             </div>
-          ))}
-        </div>
-      </section>
-      {/* FORM */}
-      <section className="rounded-[30px] border border-[#e5dbff] bg-white p-6 shadow-sm margintop-10">
-
-        <div className="mb-6 flex items-center gap-3">
-
-          <div className="rounded-2xl bg-[#efe7ff] p-3">
-            <Boxes className="h-6 w-6 text-[#6b3df0]" />
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = "/";
+              }}
+              className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#f56483] px-3 sm:px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
           </div>
+        </div>
+      </div>
 
-          <div>
-            <h2 className="text-2xl font-bold text-[#2b124c]">
-              {editingId
-                ? "Edit Inventory Item"
-                : "Create Inventory Item"}
+
+
+
+          {/* INVENTORY LIST */}
+          <section className="mt-10">
+
+            <h2 className="mb-5 text-2xl font-bold text-[#2b124c]">
+              Inventory Items
             </h2>
 
-            <p className="text-sm text-[#7d6b99]">
-              Add and manage stock items.
-            </p>
-          </div>
-        </div>
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {filteredInventory.map((item) => (
+                <div
+                  key={item.id}
+                  className="rounded-[28px] border border-[#e5dbff] bg-white p-5"
+                >
 
-          <input
-            type="text"
-            placeholder="Item name"
-            value={form.item_name}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                item_name: e.target.value,
-              })
-            }
-            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
-          />
+                  <div className="flex items-start justify-between gap-4">
 
-          <input
-            type="number"
-            placeholder="Quantity"
-            value={form.quantity}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                quantity: Number(e.target.value),
-              })
-            }
-            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
-          />
+                    <div>
+                      <h3 className="text-xl font-bold text-[#2b124c]">
+                        {item.item_name}
+                      </h3>
 
-          <input
-            type="text"
-            placeholder="Category"
-            value={form.category}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                category: e.target.value,
-              })
-            }
-            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
-          />
+                      <p className="mt-2 text-sm text-[#6b3df0]">
+                        {item.category}
+                      </p>
+                    </div>
 
-          <input
-            type="text"
-            placeholder="Unit"
-            value={form.unit}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                unit: e.target.value,
-              })
-            }
-            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
-          />
+                    <div className="rounded-full bg-[#efe7ff] px-3 py-1 text-xs font-semibold text-[#6b3df0]">
+                      {item.status}
+                    </div>
+                  </div>
 
-          <input
-            type="text"
-            placeholder="Location"
-            value={form.location}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                location: e.target.value,
-              })
-            }
-            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
-          />
+                  <div className="mt-5 space-y-2 text-sm text-[#5f4b7a]">
 
-          <select
-            value={form.status}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                status: e.target.value,
-              })
-            }
-            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
-          >
-            <option value="available">
-              recieved
-            </option>
+                    <p>
+                      Quantity: {item.quantity}
+                    </p>
 
-            <option value="reserved">
-              dispatched
-            </option>
-          </select>
-        </div>
+                    <p>
+                      Unit: {item.unit || "N/A"}
+                    </p>
 
-        <textarea
-          placeholder="Notes..."
-          value={form.notes}
-          onChange={(e) =>
-            setForm({
-              ...form,
-              notes: e.target.value,
-            })
-          }
-          className="mt-4 min-h-[120px] w-full rounded-2xl border border-[#ddd3f5] p-4 outline-none"
-        />
+                    <p>
+                      Location: {item.location || "N/A"}
+                    </p>
 
-        <div className="mt-5 flex flex-wrap gap-4">
+                    <p>
+                      Notes: {item.notes || "None"}
+                    </p>
+                  </div>
 
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="inline-flex items-center gap-2 rounded-2xl bg-[#6b3df0] px-6 py-4 font-semibold text-white"
-          >
-            <Plus className="h-5 w-5" />
+                  <div className="mt-6 flex gap-3">
 
-            {editingId
-              ? "Update Item"
-              : "Create Item"}
-          </button>
+                    <button
+                      onClick={() => editItem(item)}
+                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#2b124c] px-4 py-3 text-sm font-semibold text-white"
+                    >
+                      <Pencil className="h-4 w-4" />
 
-          {editingId && (
-            <button
-              onClick={resetForm}
-              className="rounded-2xl border border-[#ddd3f5] px-6 py-4 font-semibold text-[#2b124c]"
-            >
-              Cancel Editing
-            </button>
-          )}
-        </div>
-      </section>
-    </main>
-  );
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        deleteItem(item.id)
+                      }
+                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-3 text-sm font-semibold text-white"
+                    >
+                      <Trash2 className="h-4 w-4" />
+
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+          {/* FORM */}
+          <section className="rounded-[30px] border border-[#e5dbff] bg-white p-6 shadow-sm margintop-10">
+
+            <div className="mb-6 flex items-center gap-3">
+
+              <div className="rounded-2xl bg-[#efe7ff] p-3">
+                <Boxes className="h-6 w-6 text-[#6b3df0]" />
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-bold text-[#2b124c]">
+                  {editingId
+                    ? "Edit Inventory Item"
+                    : "Create Inventory Item"}
+                </h2>
+
+                <p className="text-sm text-[#7d6b99]">
+                  Add and manage stock items.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+
+              <input
+                type="text"
+                placeholder="Item name"
+                value={form.item_name}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    item_name: e.target.value,
+                  })
+                }
+                className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+              />
+
+              <input
+                type="number"
+                placeholder="Quantity"
+                value={form.quantity}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    quantity: Number(e.target.value),
+                  })
+                }
+                className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+              />
+
+              <input
+                type="text"
+                placeholder="Category"
+                value={form.category}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    category: e.target.value,
+                  })
+                }
+                className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+              />
+
+              <input
+                type="text"
+                placeholder="Unit"
+                value={form.unit}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    unit: e.target.value,
+                  })
+                }
+                className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+              />
+
+              <input
+                type="text"
+                placeholder="Location"
+                value={form.location}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    location: e.target.value,
+                  })
+                }
+                className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+              />
+
+              <select
+                value={form.status}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    status: e.target.value,
+                  })
+                }
+                className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+              >
+                <option value="available">
+                  recieved
+                </option>
+
+                <option value="reserved">
+                  dispatched
+                </option>
+              </select>
+            </div>
+
+            <textarea
+              placeholder="Notes..."
+              value={form.notes}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  notes: e.target.value,
+                })
+              }
+              className="mt-4 min-h-[120px] w-full rounded-2xl border border-[#ddd3f5] p-4 outline-none"
+            />
+
+            <div className="mt-5 flex flex-wrap gap-4">
+
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="inline-flex items-center gap-2 rounded-2xl bg-[#6b3df0] px-6 py-4 font-semibold text-white"
+              >
+                <Plus className="h-5 w-5" />
+
+                {editingId
+                  ? "Update Item"
+                  : "Create Item"}
+              </button>
+
+              {editingId && (
+                <button
+                  onClick={resetForm}
+                  className="rounded-2xl border border-[#ddd3f5] px-6 py-4 font-semibold text-[#2b124c]"
+                >
+                  Cancel Editing
+                </button>
+              )}
+            </div>
+          </section>
+        </main>
+        );
 }

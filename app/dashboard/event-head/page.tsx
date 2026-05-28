@@ -74,12 +74,12 @@ export default function EventHeadDashboard() {
   });
 
   useEffect(() => {
-  const role = sessionStorage.getItem("portal_role");
-  if (role !== "event_head") {
-    alert("Unauthorized");
-    window.location.href = "/";
-  }
-}, []);
+    const role = sessionStorage.getItem("portal_role");
+    if (role !== "event_head") {
+      alert("Unauthorized");
+      window.location.href = "/";
+    }
+  }, []);
 
   useEffect(() => {
     const role = sessionStorage.getItem("portal_role");
@@ -363,7 +363,7 @@ export default function EventHeadDashboard() {
       <div className="mb-10 flex items-start justify-between gap-4">
 
         <div>
-          <h1 className="text-4xl font-black text-[#2b124c]">
+          <h1 className="text-2xl sm:text-4xl font-black text-[#2b124c]">
             Event Head Dashboard
           </h1>
 
@@ -377,10 +377,10 @@ export default function EventHeadDashboard() {
             await supabase.auth.signOut();
             window.location.href = "/";
           }}
-          className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
+          className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#f56483] px-3 sm:px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
         >
           <LogOut className="h-4 w-4" />
-          Logout
+          <span className="hidden sm:inline">Logout</span>
         </button>
 
       </div>
@@ -527,7 +527,7 @@ export default function EventHeadDashboard() {
             >
 
               {/* EVENT HEADER */}
-              <div className="bg-gradient-to-r from-[#6b3df0] to-[#8f6dff] p-6 text-white">
+              <div className="bg-gradient-to-r from-[#6b3df0] to-[#8f6dff] p-4 sm:p-6 text-white">
 
                 <div className="flex flex-col gap-5 lg:flex-row lg:justify-between">
 
@@ -547,7 +547,7 @@ export default function EventHeadDashboard() {
                           )
                         )
                       }
-                      className="w-full bg-transparent text-3xl font-black outline-none"
+                      className="w-full bg-transparent text-xl sm:text-3xl font-black outline-none"
                     />
 
                     <textarea
@@ -602,7 +602,7 @@ export default function EventHeadDashboard() {
                             )
                           )
                         }
-                        className="rounded-xl bg-white/20 px-4 py-3 outline-none"
+                        className=" w-full rounded-xl bg-white/20 px-4 py-3 outline-none"
                       />
 
                       <input

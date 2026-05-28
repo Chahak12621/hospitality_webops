@@ -195,8 +195,8 @@ export default function CoreTeamDashboard() {
       <div className="fixed right-[-120px] bottom-[-100px] -z-10 h-[400px] w-[400px] rounded-full bg-[#703c84]/15 blur-3xl" />
 
       {/* ── NAVBAR ── */}
-      <nav className="sticky top-0 z-30 border-b border-white/40 bg-white/40 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <nav className="sticky top-0 z-30 border-b border-white/40 bg-white/40 backdrop-blur-xl overflow-hidden">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
 
           {/* Left — Logo + Title */}
           <div className="flex items-center gap-4">
@@ -205,7 +205,7 @@ export default function CoreTeamDashboard() {
             </div>
 
             <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-[#703c84]">
+              <p className="hidden sm:block text-xs uppercase tracking-[0.4em] text-[#703c84]">
                 Paradox '26 · Hospitality
               </p>
               <div className="flex items-center gap-2">
@@ -225,10 +225,10 @@ export default function CoreTeamDashboard() {
                 await supabase.auth.signOut();
                 window.location.href = "/";
               }}
-              className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
+              className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-3 py-2.5 sm:px-5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
             >
               <LogOut className="h-4 w-4" />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>
@@ -275,7 +275,7 @@ export default function CoreTeamDashboard() {
                 className="overflow-hidden rounded-[32px] border border-white/50 bg-white/40 shadow-[0_20px_60px_rgba(0,0,0,0.08)] backdrop-blur-md"
               >
                 {/* ── EVENT HEADER BANNER ── */}
-                <div className="relative overflow-hidden bg-gradient-to-r from-[#703c84] to-[#f56483] p-8 text-white">
+                <div className="relative overflow-hidden bg-gradient-to-r from-[#703c84] to-[#f56483] p-5 sm:p-8 text-white">
                   {/* Decorative orb */}
                   <div className="absolute right-[-60px] top-[-60px] h-[200px] w-[200px] rounded-full bg-white/10 blur-2xl" />
                   <div className="absolute bottom-[-40px] left-[30%] h-[150px] w-[150px] rounded-full bg-white/10 blur-2xl" />

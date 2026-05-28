@@ -44,7 +44,7 @@ export default function LandingPage() {
       <div className="absolute left-[-100px] top-[-100px] h-[360px] w-[360px] rounded-full bg-[#f56483]/25 blur-3xl" />
       <div className="absolute right-[-100px] bottom-[-100px] h-[360px] w-[360px] rounded-full bg-[#703c84]/20 blur-3xl" />
 
-      <nav className="relative z-20 mx-auto flex max-w-screen-xl flex-col gap-6 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
+      <nav className="relative z-20 mx-auto flex max-w-screen-xl flex-row items-center justify-between px-6 py-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="h-14 w-14 rounded-2xl bg-white/60 p-2 shadow-[0_20px_50px_rgba(15,23,42,0.12)] backdrop-blur-xl">
             <img src="logo1.png" alt="paradox-logo" className="h-full w-full object-contain" />
