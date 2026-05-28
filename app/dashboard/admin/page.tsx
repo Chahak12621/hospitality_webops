@@ -692,7 +692,7 @@ export default function AdminDashboard() {
               <option value="technical">Technical</option>
               <option value="cultural">Cultural</option>
               <option value="sports">Sports</option>
-              <option value="Central">Central</option>
+              <option value="central">Central</option>
             </select>
             <div className="mt-4 flex gap-3">
               <button onClick={updateEvent} className="flex-1 rounded-full bg-gradient-to-r from-[#703c84] to-[#f56483] py-2.5 text-sm font-bold text-white">
