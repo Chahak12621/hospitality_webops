@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
-  Package,
   Plus,
   Pencil,
   Trash2,
@@ -248,228 +247,245 @@ export default function InventoryDashboard() {
 
 
 
-          {/* INVENTORY LIST */}
-          <section className="mt-10">
+      {/* INVENTORY LIST */}
+      <section className="mt-10">
 
-            <h2 className="mb-5 text-2xl font-bold text-[#2b124c]">
-              Inventory Items
-            </h2>
+        <h2 className="mb-5 text-2xl font-bold text-[#2b124c]">
+          Inventory Items
+        </h2>
 
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
 
-              {filteredInventory.map((item) => (
-                <div
-                  key={item.id}
-                  className="rounded-[28px] border border-[#e5dbff] bg-white p-5"
-                >
+          {filteredInventory.map((item) => (
+            <div
+              key={item.id}
+              className="rounded-[28px] border border-[#e5dbff] bg-white p-5"
+            >
 
-                  <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-4">
 
-                    <div>
-                      <h3 className="text-xl font-bold text-[#2b124c]">
-                        {item.item_name}
-                      </h3>
+                <div>
+                  <h3 className="text-xl font-bold text-[#2b124c]">
+                    {item.item_name}
+                  </h3>
 
-                      <p className="mt-2 text-sm text-[#6b3df0]">
-                        {item.category}
-                      </p>
-                    </div>
-
-                    <div className="rounded-full bg-[#efe7ff] px-3 py-1 text-xs font-semibold text-[#6b3df0]">
-                      {item.status}
-                    </div>
-                  </div>
-
-                  <div className="mt-5 space-y-2 text-sm text-[#5f4b7a]">
-
-                    <p>
-                      Quantity: {item.quantity}
-                    </p>
-
-                    <p>
-                      Unit: {item.unit || "N/A"}
-                    </p>
-
-                    <p>
-                      Location: {item.location || "N/A"}
-                    </p>
-
-                    <p>
-                      Notes: {item.notes || "None"}
-                    </p>
-                  </div>
-
-                  <div className="mt-6 flex gap-3">
-
-                    <button
-                      onClick={() => editItem(item)}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#2b124c] px-4 py-3 text-sm font-semibold text-white"
-                    >
-                      <Pencil className="h-4 w-4" />
-
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        deleteItem(item.id)
-                      }
-                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-3 text-sm font-semibold text-white"
-                    >
-                      <Trash2 className="h-4 w-4" />
-
-                      Delete
-                    </button>
-                  </div>
+                  <p className="mt-2 text-sm text-[#6b3df0]">
+                    {item.category}
+                  </p>
                 </div>
-              ))}
-            </div>
-          </section>
-          {/* FORM */}
-          <section className="rounded-[30px] border border-[#e5dbff] bg-white p-6 shadow-sm margintop-10">
 
-            <div className="mb-6 flex items-center gap-3">
-
-              <div className="rounded-2xl bg-[#efe7ff] p-3">
-                <Boxes className="h-6 w-6 text-[#6b3df0]" />
+                <div className="rounded-full bg-[#efe7ff] px-3 py-1 text-xs font-semibold text-[#6b3df0]">
+                  {item.status}
+                </div>
               </div>
 
-              <div>
-                <h2 className="text-2xl font-bold text-[#2b124c]">
-                  {editingId
-                    ? "Edit Inventory Item"
-                    : "Create Inventory Item"}
-                </h2>
+              <div className="mt-5 space-y-2 text-sm text-[#5f4b7a]">
 
-                <p className="text-sm text-[#7d6b99]">
-                  Add and manage stock items.
+                <p>
+                  Quantity: {item.quantity}
+                </p>
+
+                <p>
+                  Unit: {item.unit || "N/A"}
+                </p>
+
+                <p>
+                  Location: {item.location || "N/A"}
+                </p>
+
+                <p>
+                  Notes: {item.notes || "None"}
                 </p>
               </div>
+
+              <div className="mt-6 flex flex-col gap-3">
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => editItem(item)}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#2b124c] px-4 py-3 text-sm font-semibold text-white"
+                  >
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => deleteItem(item.id)}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-3 text-sm font-semibold text-white"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </button>
+                </div>
+
+                <div className="flex gap-3">
+                  <a
+                    href="https://drive.google.com/drive/folders/1mKMqdyI5WpusOE1K0MkzxLkU7tLqqnB2?usp=drive_link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#efe7ff] px-4 py-3 text-sm font-semibold text-[#6b3df0] hover:bg-[#e0d4ff] transition"
+                  >
+                    🖼️ Upload Image
+                  </a>
+
+                  <a
+                    href="https://drive.google.com/drive/folders/133F6BFoo125hZGraTdc_j9JejMd67hGw?usp=drive_link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#efe7ff] px-4 py-3 text-sm font-semibold text-[#6b3df0] hover:bg-[#e0d4ff] transition"
+                  >
+                    🧾 Upload Bill
+                  </a>
+                </div>
+              </div>
             </div>
+          ))}
+        </div>
+      </section>
+      {/* FORM */}
+      <section className="rounded-[30px] border border-[#e5dbff] bg-white p-6 shadow-sm mt-10">
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mb-6 flex items-center gap-3">
 
-              <input
-                type="text"
-                placeholder="Item name"
-                value={form.item_name}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    item_name: e.target.value,
-                  })
-                }
-                className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
-              />
+          <div className="rounded-2xl bg-[#efe7ff] p-3">
+            <Boxes className="h-6 w-6 text-[#6b3df0]" />
+          </div>
 
-              <input
-                type="number"
-                placeholder="Quantity"
-                value={form.quantity}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    quantity: Number(e.target.value),
-                  })
-                }
-                className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
-              />
+          <div>
+            <h2 className="text-2xl font-bold text-[#2b124c]">
+              {editingId
+                ? "Edit Inventory Item"
+                : "Create Inventory Item"}
+            </h2>
 
-              <input
-                type="text"
-                placeholder="Category"
-                value={form.category}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    category: e.target.value,
-                  })
-                }
-                className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
-              />
+            <p className="text-sm text-[#7d6b99]">
+              Add and manage stock items.
+            </p>
+          </div>
+        </div>
 
-              <input
-                type="text"
-                placeholder="Unit"
-                value={form.unit}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    unit: e.target.value,
-                  })
-                }
-                className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
-              />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 
-              <input
-                type="text"
-                placeholder="Location"
-                value={form.location}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    location: e.target.value,
-                  })
-                }
-                className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
-              />
+          <input
+            type="text"
+            placeholder="Item name"
+            value={form.item_name}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                item_name: e.target.value,
+              })
+            }
+            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+          />
 
-              <select
-                value={form.status}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    status: e.target.value,
-                  })
-                }
-                className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
-              >
-                <option value="available">
-                  recieved
-                </option>
+          <input
+            type="number"
+            placeholder="Quantity"
+            value={form.quantity}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                quantity: Number(e.target.value),
+              })
+            }
+            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+          />
 
-                <option value="reserved">
-                  dispatched
-                </option>
-              </select>
-            </div>
+          <input
+            type="text"
+            placeholder="Category"
+            value={form.category}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                category: e.target.value,
+              })
+            }
+            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+          />
 
-            <textarea
-              placeholder="Notes..."
-              value={form.notes}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  notes: e.target.value,
-                })
-              }
-              className="mt-4 min-h-[120px] w-full rounded-2xl border border-[#ddd3f5] p-4 outline-none"
-            />
+          <input
+            type="text"
+            placeholder="Unit"
+            value={form.unit}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                unit: e.target.value,
+              })
+            }
+            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+          />
 
-            <div className="mt-5 flex flex-wrap gap-4">
+          <input
+            type="text"
+            placeholder="Location"
+            value={form.location}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                location: e.target.value,
+              })
+            }
+            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+          />
 
-              <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="inline-flex items-center gap-2 rounded-2xl bg-[#6b3df0] px-6 py-4 font-semibold text-white"
-              >
-                <Plus className="h-5 w-5" />
+          <select
+            value={form.status}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                status: e.target.value,
+              })
+            }
+            className="rounded-2xl border border-[#ddd3f5] px-4 py-4 outline-none"
+          >
+            <option value="available">
+              recieved
+            </option>
 
-                {editingId
-                  ? "Update Item"
-                  : "Create Item"}
-              </button>
+            <option value="reserved">
+              dispatched
+            </option>
+          </select>
+        </div>
 
-              {editingId && (
-                <button
-                  onClick={resetForm}
-                  className="rounded-2xl border border-[#ddd3f5] px-6 py-4 font-semibold text-[#2b124c]"
-                >
-                  Cancel Editing
-                </button>
-              )}
-            </div>
-          </section>
-        </main>
-        );
+        <textarea
+          placeholder="Notes..."
+          value={form.notes}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              notes: e.target.value,
+            })
+          }
+          className="mt-4 min-h-[120px] w-full rounded-2xl border border-[#ddd3f5] p-4 outline-none"
+        />
+
+        <div className="mt-5 flex flex-wrap gap-4">
+
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-2xl bg-[#6b3df0] px-6 py-4 font-semibold text-white"
+          >
+            <Plus className="h-5 w-5" />
+
+            {editingId
+              ? "Update Item"
+              : "Create Item"}
+          </button>
+
+          {editingId && (
+            <button
+              onClick={resetForm}
+              className="rounded-2xl border border-[#ddd3f5] px-6 py-4 font-semibold text-[#2b124c]"
+            >
+              Cancel Editing
+            </button>
+          )}
+        </div>
+      </section >
+    </main >
+  );
 }
