@@ -199,50 +199,50 @@ export default function InventoryDashboard() {
   return (
     <main className="min-h-screen bg-[#f8f6ff] p-4 md:p-8">
 
-      {/* HEADER */}
-      <div className="mb-8 flex flex-col gap-4">
+      {/* NAVBAR */}
+      <nav className="sticky top-0 z-30 mb-8 border-b border-[#e5dbff] bg-[#f8f6ff]/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
 
-        <div>
-          <h1 className="text-3xl font-black text-[#2b124c]">
-            Inventory Dashboard
-          </h1>
+          {/* Left: Title */}
+          <div>
+            <h1 className="text-xl font-black text-[#2b124c] md:text-3xl">
+              Inventory Dashboard
+            </h1>
+            <p className="hidden text-sm text-[#5f4b7a] md:block">
+              Manage hospitality inventory items.
+            </p>
+          </div>
 
-          <p className="mt-2 text-[#5f4b7a]">
-            Manage hospitality inventory items.
-          </p>
-        </div>
+          {/* Right: Search + Logout */}
+          <div className="flex items-center gap-2">
 
-
-        {/* SEARCH */}
-        <div className="relative w-full md:w-[320px]">
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1">
-
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7d6b99]" />
-
+            {/* Search — icon only on mobile, full bar on desktop */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7d6b99]" />
               <input
                 type="text"
                 placeholder="Search inventory..."
                 value={search}
-                onChange={(e) =>
-                  setSearch(e.target.value)
-                }
-                className="w-full rounded-2xl border border-[#ddd3f5] bg-white py-4 pl-11 pr-4 outline-none focus:border-[#8d5cf6]"
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-8 rounded-full border border-[#ddd3f5] bg-white py-2 pl-9 pr-3 outline-none transition-all duration-300 focus:w-48 focus:border-[#8d5cf6] md:w-64 md:focus:w-72"
               />
             </div>
+
+            {/* Logout */}
             <button
               onClick={async () => {
+                sessionStorage.clear();
                 await supabase.auth.signOut();
                 window.location.href = "/";
               }}
-              className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#f56483] px-3 sm:px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition duration-300 hover:scale-105 hover:bg-[#e14f72]"
+              className="inline-flex items-center gap-2 rounded-full bg-[#f56483] px-3 py-2 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(245,100,131,0.3)] transition hover:scale-105 hover:bg-[#e14f72] md:px-5"
             >
               <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
+              <span className="hidden md:inline">Logout</span>
             </button>
           </div>
         </div>
-      </div>
+      </nav>
 
 
 
