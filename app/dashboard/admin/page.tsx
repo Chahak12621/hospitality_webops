@@ -118,6 +118,9 @@ export default function AdminDashboard() {
   const [editingEvent, setEditingEvent] = useState<EventType | null>(null);
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
   const [assignments, setAssignments] = useState<{ event_id: string, member_id: string }[]>([])
+  const [editingGuest, setEditingGuest] = useState<GuestType | null>(null);
+  const [addingGuestForEvent, setAddingGuestForEvent] = useState<string | null>(null);
+  const [newGuest, setNewGuest] = useState<Partial<GuestType>>({});
 
   useEffect(() => {
     const role = sessionStorage.getItem("portal_role");
@@ -152,6 +155,49 @@ export default function AdminDashboard() {
     setCoreTeam(coreTeamData || []);
     setEventHeads(eventHeadData || []);
     setAssignments(assignmentData || []);
+  };
+  const updateGuest = async () => {
+    if (!editingGuest) return;
+    const { error } = await supabase
+      .from("guests")
+      .update({
+        guest_name: editingGuest.guest_name,
+        guest_email: editingGuest.guest_email,
+        guest_phone: editingGuest.guest_phone,
+        guest_food_preferences: editingGuest.guest_food_preferences,
+        pickup_point: editingGuest.pickup_point,
+        dropoff_point: editingGuest.dropoff_point,
+        arrival_date: editingGuest.arrival_date,
+        departure_date: editingGuest.departure_date,
+        arrival_time: editingGuest.arrival_time,
+        departure_time: editingGuest.departure_time,
+        special_requests: editingGuest.special_requests,
+        health_issues: editingGuest.health_issues,
+        status: editingGuest.status,
+      })
+      .eq("id", editingGuest.id);
+    if (error) { alert(error.message); return; }
+    setEditingGuest(null);
+    await fetchData();
+  };
+
+  const deleteGuest = async (guestId: string) => {
+    if (!confirm("Delete this guest? This cannot be undone.")) return;
+    const { error } = await supabase.from("guests").delete().eq("id", guestId);
+    if (!error) await fetchData();
+  };
+
+  const addGuest = async () => {
+    if (!addingGuestForEvent || !newGuest.guest_name) return;
+    const { error } = await supabase.from("guests").insert({
+      ...newGuest,
+      event_id: addingGuestForEvent,
+      status: "pending",
+    });
+    if (error) { alert(error.message); return; }
+    setAddingGuestForEvent(null);
+    setNewGuest({});
+    await fetchData();
   };
 
   const filteredEvents = useMemo(
@@ -504,7 +550,14 @@ export default function AdminDashboard() {
                           <>View {eventGuests.length} Guest{eventGuests.length !== 1 ? "s" : ""} <ChevronDown className="h-4 w-4" /></>
                         )}
                       </button>
+
                     )}
+                    <button
+                      onClick={() => { setAddingGuestForEvent(event.id); setNewGuest({}); }}
+                      className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-[#f56483]/30 bg-[#fdcbca]/20 py-2.5 text-xs font-semibold text-[#f56483] transition hover:bg-[#f56483]/10"
+                    >
+                      + Add Guest
+                    </button>
                   </div>
 
                   {/* GUESTS PANEL */}
@@ -528,6 +581,21 @@ export default function AdminDashboard() {
                                   <option value="checked_in">Checked In</option>
                                   <option value="checked_out">Checked Out</option>
                                 </select>
+
+                                <div className="flex gap-1 mt-1">
+                                  <button
+                                    onClick={() => setEditingGuest(guest)}
+                                    className="rounded-full border border-[#703c84]/30 bg-white/60 px-2 py-1 text-[10px] font-semibold text-[#703c84] transition hover:bg-[#703c84] hover:text-white"
+                                  >
+                                    ✏️ Edit
+                                  </button>
+                                  <button
+                                    onClick={() => deleteGuest(guest.id)}
+                                    className="rounded-full border border-red-200 bg-red-50 px-2 py-1 text-[10px] font-semibold text-red-500 transition hover:bg-red-500 hover:text-white"
+                                  >
+                                    🗑️
+                                  </button>
+                                </div>
                               </div>
 
                               <div className="flex flex-col gap-1.5 text-xs text-[#4a3d52]">
@@ -697,6 +765,92 @@ export default function AdminDashboard() {
           </div>
         </section>
       </div>
+      {editingGuest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="w-full max-w-lg rounded-[28px] bg-white p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="mb-5 text-xl font-black text-[#703c84]">Edit Guest</h3>
+            {([
+              ["guest_name", "Guest Name", "text"],
+              ["guest_email", "Email", "email"],
+              ["guest_phone", "Phone", "text"],
+              ["guest_food_preferences", "Food Preferences", "text"],
+              ["pickup_point", "Pickup Point", "text"],
+              ["dropoff_point", "Dropoff Point", "text"],
+              ["arrival_date", "Arrival Date", "date"],
+              ["departure_date", "Departure Date", "date"],
+              ["arrival_time", "Arrival Time", "time"],
+              ["departure_time", "Departure Time", "time"],
+              ["special_requests", "Special Requests", "text"],
+              ["health_issues", "Health Issues", "text"],
+            ] as [keyof GuestType, string, string][]).map(([field, label, type]) => (
+              <input
+                key={field}
+                type={type}
+                placeholder={label}
+                value={(editingGuest as any)[field] ?? ""}
+                onChange={(e) => setEditingGuest({ ...editingGuest, [field]: e.target.value })}
+                className="mb-3 w-full rounded-xl border border-[#703c84]/20 px-4 py-2.5 text-sm outline-none focus:border-[#703c84]"
+              />
+            ))}
+            <select
+              value={editingGuest.status}
+              onChange={(e) => setEditingGuest({ ...editingGuest, status: e.target.value })}
+              className="mb-4 w-full rounded-xl border border-[#703c84]/20 px-4 py-2.5 text-sm outline-none focus:border-[#703c84] bg-white"
+            >
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="checked_in">Checked In</option>
+              <option value="checked_out">Checked Out</option>
+            </select>
+            <div className="flex gap-3">
+              <button onClick={updateGuest} className="flex-1 rounded-full bg-gradient-to-r from-[#703c84] to-[#f56483] py-2.5 text-sm font-bold text-white">
+                Save Changes
+              </button>
+              <button onClick={() => setEditingGuest(null)} className="flex-1 rounded-full border border-slate-200 py-2.5 text-sm font-semibold text-slate-500">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {addingGuestForEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="w-full max-w-lg rounded-[28px] bg-white p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="mb-5 text-xl font-black text-[#f56483]">Add Guest</h3>
+            {([
+              ["guest_name", "Guest Name *", "text"],
+              ["guest_email", "Email", "email"],
+              ["guest_phone", "Phone", "text"],
+              ["guest_food_preferences", "Food Preferences", "text"],
+              ["pickup_point", "Pickup Point", "text"],
+              ["dropoff_point", "Dropoff Point", "text"],
+              ["arrival_date", "Arrival Date", "date"],
+              ["departure_date", "Departure Date", "date"],
+              ["arrival_time", "Arrival Time", "time"],
+              ["departure_time", "Departure Time", "time"],
+              ["special_requests", "Special Requests", "text"],
+              ["health_issues", "Health Issues", "text"],
+            ] as [keyof GuestType, string, string][]).map(([field, label, type]) => (
+              <input
+                key={field}
+                type={type}
+                placeholder={label}
+                value={(newGuest as any)[field] ?? ""}
+                onChange={(e) => setNewGuest({ ...newGuest, [field]: e.target.value })}
+                className="mb-3 w-full rounded-xl border border-[#703c84]/20 px-4 py-2.5 text-sm outline-none focus:border-[#703c84]"
+              />
+            ))}
+            <div className="flex gap-3 mt-2">
+              <button onClick={addGuest} className="flex-1 rounded-full bg-gradient-to-r from-[#f56483] to-[#703c84] py-2.5 text-sm font-bold text-white">
+                Add Guest
+              </button>
+              <button onClick={() => { setAddingGuestForEvent(null); setNewGuest({}); }} className="flex-1 rounded-full border border-slate-200 py-2.5 text-sm font-semibold text-slate-500">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {editingEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
           <div className="w-full max-w-lg rounded-[28px] bg-white p-8 shadow-2xl">
