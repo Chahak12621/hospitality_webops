@@ -12,7 +12,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
-  const [requiresPassword, setRequiresPassword] = useState(false);
+  const [requiresPassword, setRequiresPassword] = useState(false); \
+  const [accessRevoked, setAccessRevoked] = useState(false);
 
   // ─────────────────────────────────────────────
   // LOGIN
@@ -150,16 +151,12 @@ export default function LoginPage() {
         .maybeSingle();
 
       if (eventHead) {
-        sessionStorage.setItem(
-          "portal_email",
-          trimmedEmail
-        );
-
-        sessionStorage.setItem(
-          "portal_role",
-          "event_head"
-        );
-
+        if (eventHead.access === "revoked") {
+          setAccessRevoked(true);
+          return;
+        }
+        sessionStorage.setItem("portal_email", trimmedEmail);
+        sessionStorage.setItem("portal_role", "event_head");
         router.push("/dashboard/event-head");
         return;
       }
@@ -280,6 +277,7 @@ export default function LoginPage() {
                 const value = e.target.value;
 
                 setEmail(value);
+                setAccessRevoked(false);
 
                 if (value.trim()) {
                   await checkIfPasswordRequired(value);
@@ -313,6 +311,15 @@ export default function LoginPage() {
                 autoComplete="off"
                 className="w-full rounded-2xl border border-white/40 bg-white/50 px-5 py-4 outline-none backdrop-blur-md transition focus:border-[#703c84]"
               />
+            </div>
+          )}
+          {accessRevoked && (
+            <div className="mt-6 rounded-2xl border border-red-200 bg-red-50/80 px-5 py-4 text-sm text-red-700 leading-7">
+              <p className="font-bold text-red-600 mb-1">🚫 Access Revoked</p>
+              <p>You currently don't have access to this portal.</p>
+              <p className="mt-2">To request access, please contact the admin:</p>
+              <p className="mt-1 font-semibold">👤 [Ayush Sk]</p>
+              <a href="tel:9322949492" className="font-semibold text-red-600 hover:underline">📞 9322949492</a>
             </div>
           )}
 
