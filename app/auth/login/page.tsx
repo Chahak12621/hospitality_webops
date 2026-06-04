@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
-  const [requiresPassword, setRequiresPassword] = useState(false); \
+  const [requiresPassword, setRequiresPassword] = useState(false);
   const [accessRevoked, setAccessRevoked] = useState(false);
 
   // ─────────────────────────────────────────────
