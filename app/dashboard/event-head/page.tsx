@@ -44,6 +44,7 @@ export default function EventHeadDashboard() {
   const [guests, setGuests] = useState<GuestType[]>([]);
   const [loading, setLoading] = useState(true);
   const [coreTeam, setCoreTeam] = useState<any[]>([]);
+  const [assignments, setAssignments] = useState<{ event_id: string; member_id: string }[]>([]);
 
 
 
@@ -151,11 +152,18 @@ export default function EventHeadDashboard() {
         .select("*");
 
       setCoreTeam(coreTeamData || []);
+      const { data: assignmentData } = await supabase
+        .from("event_team_assignments")
+        .select("event_id, member_id")
+        .in("event_id", eventIds);
+
+      setAssignments(assignmentData || []);
     } catch (error) {
       console.log(error);
     } finally {
       setLoading(false);
     }
+
   };
 
   // ─────────────────────────────────────────────
@@ -511,9 +519,10 @@ export default function EventHeadDashboard() {
       <div className="grid gap-8">
 
         {events.map((event) => {
-          const assignedMember = coreTeam.find(
-            (m) => m.assigned_event_id === event.id
-          );
+          const assignment = assignments.find((a) => a.event_id === event.id);
+          const assignedMember = assignment
+            ? coreTeam.find((m) => m.id === assignment.member_id)
+            : null;
 
           const eventGuests = guests.filter(
             (guest) => guest.event_id === event.id

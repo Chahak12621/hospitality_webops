@@ -113,24 +113,27 @@ export default function CoreTeamDashboard() {
       }
 
       // FIND CORE TEAM MEMBER
-      const { data: member, error: memberError } = await supabase
+      // NEW — join through event_team_assignments
+      const { data: member } = await supabase
         .from("core_team")
-        .select("assigned_event_id")
+        .select("id")
         .eq("email", email)
         .single();
 
-      if (memberError || !member?.assigned_event_id) {
-        console.log(memberError);
-        setLoading(false);
-        return;
-      }
+      if (!member) { setLoading(false); return; }
 
+      const { data: assignment } = await supabase
+        .from("event_team_assignments")
+        .select("event_id")
+        .eq("member_id", member.id)
+        .single();
 
-      // FETCH ASSIGNED EVENT
+      if (!assignment?.event_id) { setLoading(false); return; }
+
       const { data: eventData, error: eventError } = await supabase
         .from("events")
         .select("*")
-        .eq("id", member.assigned_event_id)
+        .eq("id", assignment.event_id)
         .single();
 
       if (eventError || !eventData) {
